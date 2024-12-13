@@ -75,12 +75,17 @@ const AboutPage = () => {
     fetchAboutData();
   }, []);
 
-  // Update fetchAboutData function
+  // Update fetch calls with credentials
   const fetchAboutData = async () => {
     try {
       if (!API_URL) throw new Error('API URL not configured');
       
-      const response = await fetch(`${API_URL}/about`);
+      const response = await fetch(`${API_URL}/about`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
       
       // Transform data with proper typing
@@ -192,7 +197,7 @@ const AboutPage = () => {
     }));
   };
 
-  // Update form submission
+  // Update fetch calls with credentials
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -227,6 +232,7 @@ const AboutPage = () => {
 
       const response = await fetch(`${API_URL}/about`, {
         method: 'POST',
+        credentials: 'include', 
         headers: {
           'Content-Type': 'application/json',
         },
