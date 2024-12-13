@@ -56,7 +56,12 @@ const SettingsPage = () => {
     try {
       if (!API_URL) throw new Error('API URL not configured');
 
-      const response = await fetch(`${API_URL}/settings`);
+      const response = await fetch(`${API_URL}/settings`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       const data: ApiResponse = await response.json();
       
       if (!response.ok) {
@@ -89,7 +94,10 @@ const SettingsPage = () => {
 
       const response = await fetch(`${API_URL}/settings`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify(settings)
       });
       

@@ -62,7 +62,12 @@ const TimelinePage = () => {
     try {
       if (!API_URL) throw new Error('API URL not configured');
 
-      const response = await fetch(`${API_URL}/timeline`);
+      const response = await fetch(`${API_URL}/timeline`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       const data: ApiResponse = await response.json();
       
       if (!response.ok) throw new Error(data.error || 'Failed to fetch');
@@ -95,7 +100,10 @@ const TimelinePage = () => {
 
       const response = await fetch(`${API_URL}/timeline`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify(events)
       });
 

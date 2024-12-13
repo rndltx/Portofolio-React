@@ -79,7 +79,12 @@ const ProjectsPage = () => {
     try {
       if (!API_URL) throw new Error('API URL not configured');
       
-      const response = await fetch(`${API_URL}/projects`);
+      const response = await fetch(`${API_URL}/projects`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       const data: ApiResponse = await response.json();
       
       const transformedData: Project[] = data.data
@@ -194,6 +199,7 @@ const ProjectsPage = () => {
 
             const uploadResponse = await fetch(`${API_URL}/upload`, {
               method: 'POST',
+              credentials: 'include',
               body: formData
             });
             
@@ -230,6 +236,7 @@ const ProjectsPage = () => {
       // Submit projects data
       const response = await fetch(`${API_URL}/projects`, {
         method: 'POST', 
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectsToSubmit)
       });
