@@ -1,21 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://www.rizsign.com',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-  'Access-Control-Allow-Credentials': 'true',
-  'Access-Control-Max-Age': '86400'
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: corsHeaders
-  });
-}
-
 interface AboutData {
   id?: number;
   name: string;
@@ -40,20 +25,7 @@ interface HeroSlide {
   subtitle: string;
 }
 
-// Update GET with redirect handling
-export async function GET(request: Request) {
-  // Handle redirects for preflight
-  const url = new URL(request.url);
-  if (url.hostname === 'rizsign.com') {
-    return new NextResponse(null, {
-      status: 307,
-      headers: {
-        ...corsHeaders,
-        'Location': `https://www.rizsign.com${url.pathname}`
-      }
-    });
-  }
-
+export async function GET() {
   try {
     const aboutResults = await query<AboutData[]>('SELECT * FROM about_rizsign LIMIT 1');
     const slidesResults = await query<HeroSlide[]>('SELECT * FROM hero_slides_rizsign');
@@ -79,42 +51,17 @@ export async function GET(request: Request) {
       heroSlides
     };
 
-    return new NextResponse(JSON.stringify(response), {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json'
-      }
-    });
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching about data:', error);
-    return new NextResponse(JSON.stringify({ error: 'An error occurred' }), {
-      status: 500,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json'
-      }
-    });
+    return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
   }
 }
 
-// Update POST with redirect handling
 export async function POST(request: Request) {
-  // Handle redirects for preflight
-  const url = new URL(request.url);
-  if (url.hostname === 'rizsign.com') {
-    return new NextResponse(null, {
-      status: 307,
-      headers: {
-        ...corsHeaders,
-        'Location': `https://www.rizsign.com${url.pathname}`
-      }
-    });
-  }
+  const updatedData = await request.json();
 
   try {
-    const updatedData = await request.json();
-
     // Update about data
     await query(
       'UPDATE about_rizsign SET name = ?, title = ?, description = ?, skills = ? WHERE id = 1',
@@ -138,21 +85,16 @@ export async function POST(request: Request) {
       );
     }
 
-    return new NextResponse(JSON.stringify({ success: true }), {
-      status: 200, 
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json'
-      }
+    return NextResponse.json({ 
+      success: true, 
+      message: 'About data updated successfully' 
     });
   } catch (error) {
     console.error('Error updating about data:', error);
-    return new NextResponse(JSON.stringify({ error: 'Failed to update' }), {
-      status: 500,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json' 
-      }
+    return NextResponse.json({ 
+      error: 'Failed to update data' 
+    }, { 
+      status: 500 
     });
   }
 }
