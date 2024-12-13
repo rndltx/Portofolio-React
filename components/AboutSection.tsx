@@ -152,8 +152,9 @@ const AboutSection: React.FC = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <Image
-                      src="/placeholder.svg?height=256&width=256"
-                      alt="Your Name"
+                      src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}/profile.jpg`} 
+                      // or use dynamic path from API: aboutData.profile_image
+                      alt={aboutData.name}
                       layout="fill"
                       objectFit="cover"
                       className="rounded-full"
