@@ -37,8 +37,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
       >
         <List>
           {menuItems.map((item) => (
-            <Link href={item.link} key={item.text} passHref>
-              <ListItem button>
+            <Link href={item.link} key={item.text} passHref style={{ textDecoration: 'none', color: 'inherit' }}>
+              <ListItem component="a">
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 {isOpen && <ListItemText primary={item.text} />}
               </ListItem>
