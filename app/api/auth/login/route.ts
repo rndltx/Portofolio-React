@@ -2,6 +2,21 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { compare } from 'bcrypt';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'https://www.rizsign.com, https://rizsign.com',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+  'Access-Control-Allow-Credentials': 'true',
+  'Access-Control-Max-Age': '86400'
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders
+  });
+}
+
 interface AdminUser {
   id: number;
   username: string;
@@ -10,41 +25,37 @@ interface AdminUser {
 }
 
 export async function POST(request: Request) {
-  const { username, password } = await request.json();
-
   try {
-    // Get user by username only first
+    const { username, password } = await request.json();
+
+    // Get user by username
     const results = await query<AdminUser[]>(
       'SELECT * FROM admin_users_rizsign WHERE username = ?',
       [username]
     );
 
     if (results.length === 0) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Invalid credentials' 
-      }, { status: 401 });
+      return new NextResponse(
+        JSON.stringify({ success: false, message: 'Invalid credentials' }), 
+        { status: 401, headers: corsHeaders }
+      );
     }
 
     const user = results[0];
-
-    // Compare password hash
     const isValid = await compare(password, user.password);
 
     if (!isValid) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Invalid credentials' 
-      }, { status: 401 });
+      return new NextResponse(
+        JSON.stringify({ success: false, message: 'Invalid credentials' }), 
+        { status: 401, headers: corsHeaders }
+      );
     }
 
-    // Update last login
     await query(
       'UPDATE admin_users_rizsign SET last_login = NOW() WHERE id = ?',
       [user.id]
     );
 
-    // Create session
     const session = {
       id: user.id,
       username: user.username,
@@ -52,18 +63,29 @@ export async function POST(request: Request) {
       loginTime: new Date()
     };
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Login successful',
-      session 
-    });
+    return new NextResponse(
+      JSON.stringify({ success: true, message: 'Login successful', session }), 
+      { 
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      message: 'An error occurred' 
-    }, { status: 500 });
+    return new NextResponse(
+      JSON.stringify({ success: false, message: 'An error occurred' }), 
+      { 
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
   }
 }
 
