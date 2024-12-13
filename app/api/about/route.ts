@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_FRONTEND_URL,
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true'
+};
+
 interface AboutData {
   id?: number;
   name: string;
@@ -30,31 +37,35 @@ export async function GET() {
     const aboutResults = await query<AboutData[]>('SELECT * FROM about_rizsign LIMIT 1');
     const slidesResults = await query<HeroSlide[]>('SELECT * FROM hero_slides_rizsign');
 
-    const aboutData = aboutResults[0] || {};
-    const heroSlides = slidesResults || [];
-
-    // Parse skills from JSON string with type checking
-    let parsedSkills: string[] = [];
-    try {
-      parsedSkills = aboutData.skills ? JSON.parse(aboutData.skills) : [];
-      if (!Array.isArray(parsedSkills)) {
-        parsedSkills = [];
+    const response = {
+      success: true,
+      data: {
+        ...aboutResults[0],
+        skills: JSON.parse(aboutResults[0]?.skills || '[]'),
+        heroSlides: slidesResults
       }
-    } catch (e) {
-      console.error('Error parsing skills JSON:', e);
-      parsedSkills = [];
-    }
-
-    const response: AboutResponse = {
-      ...aboutData,
-      skills: parsedSkills,
-      heroSlides
     };
 
-    return NextResponse.json(response);
+    return new NextResponse(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
+
   } catch (error) {
-    console.error('Error fetching about data:', error);
-    return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
+    console.error('Error:', error);
+    return new NextResponse(JSON.stringify({ 
+      success: false,
+      error: 'Internal server error'
+    }), {
+      status: 500,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
   }
 }
 
