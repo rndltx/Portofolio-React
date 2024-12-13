@@ -10,13 +10,13 @@ import {
   Box, 
   Card, 
   CardContent, 
-  useTheme,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
   Snackbar,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { Plus, Trash2, School, Briefcase, Award, Star, Calendar, Flag } from 'lucide-react';
 
@@ -38,7 +38,6 @@ const iconOptions = [
 ];
 
 const TimelinePage = () => {
-  const theme = useTheme();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
@@ -131,6 +130,14 @@ const TimelinePage = () => {
     return IconComponent || <Calendar />;
   };
 
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ flexGrow: 1, width: '100%' }}>
       <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
@@ -187,7 +194,7 @@ const TimelinePage = () => {
                     {iconOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          {option.icon}
+                          {renderIcon(option.value)}
                           <Typography sx={{ ml: 1 }}>{option.value}</Typography>
                         </Box>
                       </MenuItem>
@@ -216,7 +223,7 @@ const TimelinePage = () => {
               Timeline Events
             </Typography>
             {events.map((event, index) => (
-              <Box key={index} sx={{ mb: 2, p: 2, bgcolor: theme.palette.background.paper, borderRadius: 1 }}>
+              <Box key={index} sx={{ mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={6}>
                     <TextField
@@ -259,7 +266,7 @@ const TimelinePage = () => {
                         {iconOptions.map((option) => (
                           <MenuItem key={option.value} value={option.value}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              {option.icon}
+                              {renderIcon(option.value)}
                               <Typography sx={{ ml: 1 }}>{option.value}</Typography>
                             </Box>
                           </MenuItem>

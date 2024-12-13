@@ -9,10 +9,9 @@ import {
   Box, 
   Card, 
   CardContent, 
-  useTheme,
-  LinearProgress,
   Snackbar,
-  Alert
+  Alert,
+  LinearProgress // Add this import
 } from '@mui/material';
 import { Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -39,7 +38,6 @@ interface AboutData {
 }
 
 const AboutPage = () => {
-  const theme = useTheme();
   const [aboutData, setAboutData] = useState<AboutData>({
     name: '',
     title: '',
@@ -137,23 +135,31 @@ const AboutPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // First, handle image uploads if any
       const updatedSlides = await Promise.all(aboutData.heroSlides.map(async (slide) => {
         if (slide.imageFile) {
-          // Here you would implement actual image upload logic
-          // For now, we'll just use a placeholder URL
+          // Implement actual image upload here
+          const formData = new FormData();
+          formData.append('file', slide.imageFile);
+          
+          // Upload image and get URL
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          });
+          
+          const { imageUrl } = await uploadResponse.json();
+          
           return {
             ...slide,
-            image_url: '/placeholder.svg?height=600&width=1200', // Replace with actual upload logic
+            image_url: imageUrl
           };
         }
         return slide;
       }));
 
-      // Prepare data for API
       const dataToSubmit = {
         ...aboutData,
-        heroSlides: updatedSlides.map(({ imageFile, imagePreview, uploadProgress, ...slide }) => slide)
+        heroSlides: updatedSlides
       };
 
       const response = await fetch('/api/about', {

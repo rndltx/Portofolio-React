@@ -10,10 +10,10 @@ import {
   Card, 
   CardContent, 
   CardActions,
-  useTheme,
   LinearProgress,
   Snackbar,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { Plus, Trash2, Upload, Edit2 } from 'lucide-react';
 
@@ -31,8 +31,18 @@ interface Project {
   uploadProgress?: number;
 }
 
+// Add API types
+interface ProjectApiData {
+  id?: number;
+  title: string;
+  description: string;
+  image_url: string;
+  project_url: string;
+  github_url: string;
+  technologies: string[];
+}
+
 const ProjectsPage = () => {
-  const theme = useTheme();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newProject, setNewProject] = useState<Project>({
@@ -141,38 +151,61 @@ const ProjectsPage = () => {
     }, 500);
   };
 
+  // Update handleSubmit to properly use UI states
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // First handle image uploads if any
-      const projectsToSubmit = await Promise.all(
+      const projectsToSubmit: ProjectApiData[] = await Promise.all(
         projects.map(async (project) => {
+          let finalImageUrl = project.image_url;
+
           if (project.imageFile) {
-            // Here you would implement actual image upload logic
-            // For now using placeholder
-            return {
-              ...project,
-              image_url: '/placeholder.svg?height=200&width=300'
-            };
+            const formData = new FormData();
+            formData.append('file', project.imageFile);
+            
+            setProjects(prev => prev.map(p => 
+              p.id === project.id ? { ...p, uploadProgress: 0 } : p
+            ));
+
+            const uploadResponse = await fetch('/api/upload', {
+              method: 'POST',
+              body: formData
+            });
+            
+            if (!uploadResponse.ok) {
+              throw new Error('Failed to upload image');
+            }
+
+            const { imageUrl } = await uploadResponse.json();
+            finalImageUrl = imageUrl;
+
+            setProjects(prev => prev.map(p => 
+              p.id === project.id ? { 
+                ...p, 
+                uploadProgress: 100,
+                imagePreview: imageUrl,
+                image_url: imageUrl
+              } : p
+            ));
           }
-          return project;
+
+          // Return only API data
+          return {
+            id: project.id,
+            title: project.title,
+            description: project.description,
+            image_url: finalImageUrl,
+            project_url: project.project_url,
+            github_url: project.github_url,
+            technologies: project.technologies
+          };
         })
       );
 
-      // Prepare data for API
-      const dataToSubmit = projectsToSubmit.map(({ 
-        imageFile, 
-        imagePreview, 
-        uploadProgress, 
-        ...project 
-      }) => project);
-
       const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataToSubmit),
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(projectsToSubmit)
       });
 
       const data = await response.json();
@@ -203,6 +236,14 @@ const ProjectsPage = () => {
     }
     setSnackbar({ ...snackbar, open: false });
   };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ flexGrow: 1, width: '100%' }}>

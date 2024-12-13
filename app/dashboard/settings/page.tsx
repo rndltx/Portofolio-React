@@ -1,46 +1,120 @@
 'use client'
 
-import React, { useState } from 'react';
-import { Typography, TextField, Button, Grid, Card, CardContent, Box, useTheme } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { 
+  Typography, 
+  TextField, 
+  Button, 
+  Grid, 
+  Card, 
+  CardContent, 
+  Box,
+  Snackbar,
+  Alert,
+  CircularProgress
+} from '@mui/material';
 import { Save } from 'lucide-react';
 
+interface Settings {
+  name: string;
+  email: string;
+  bio: string;
+  footerText: string;
+  copyrightText: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  error?: string;
+  data?: Settings;
+}
+
+type CustomError = Error | { message: string };
+
 const SettingsPage = () => {
-  const theme = useTheme();
-  const [profileSettings, setProfileSettings] = useState({
+  const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState<Settings>({
     name: '',
     email: '',
     bio: '',
-  });
-  const [footerSettings, setFooterSettings] = useState({
     footerText: '',
-    copyrightText: '',
+    copyrightText: ''
+  });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error'
   });
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfileSettings({
-      ...profileSettings,
-      [e.target.name]: e.target.value,
-    });
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      const data: ApiResponse = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load settings');
+      }
+      
+      setSettings(data.data || {
+        name: '',
+        email: '',
+        bio: '',
+        footerText: '',
+        copyrightText: ''
+      });
+    } catch (error: unknown) {
+      const customError = error as CustomError;
+      setSnackbar({
+        open: true,
+        message: customError.message || 'Failed to load settings',
+        severity: 'error'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleFooterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFooterSettings({
-      ...footerSettings,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the profile data to your backend
-    console.log('Profile Settings:', profileSettings);
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      });
+      
+      const data: ApiResponse = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update settings');
+      }
+
+      setSnackbar({
+        open: true,
+        message: 'Settings updated successfully',
+        severity: 'success'
+      });
+    } catch (error: unknown) {
+      const customError = error as CustomError;
+      setSnackbar({
+        open: true,
+        message: customError.message || 'Failed to update settings',
+        severity: 'error'
+      });
+    }
   };
 
-  const handleFooterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the footer data to your backend
-    console.log('Footer Settings:', footerSettings);
-  };
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
@@ -54,15 +128,15 @@ const SettingsPage = () => {
               <Typography variant="h6" gutterBottom>
                 Profile Settings
               </Typography>
-              <form onSubmit={handleProfileSubmit}>
+              <form onSubmit={handleSubmit}>
                 <TextField
                   label="Name"
                   name="name"
                   variant="outlined"
                   fullWidth
                   margin="normal"
-                  value={profileSettings.name}
-                  onChange={handleProfileChange}
+                  value={settings.name}
+                  onChange={(e) => setSettings({ ...settings, name: e.target.value })}
                 />
                 <TextField
                   label="Email"
@@ -71,8 +145,8 @@ const SettingsPage = () => {
                   variant="outlined"
                   fullWidth
                   margin="normal"
-                  value={profileSettings.email}
-                  onChange={handleProfileChange}
+                  value={settings.email}
+                  onChange={(e) => setSettings({ ...settings, email: e.target.value })}
                 />
                 <TextField
                   label="Bio"
@@ -82,8 +156,8 @@ const SettingsPage = () => {
                   variant="outlined"
                   fullWidth
                   margin="normal"
-                  value={profileSettings.bio}
-                  onChange={handleProfileChange}
+                  value={settings.bio}
+                  onChange={(e) => setSettings({ ...settings, bio: e.target.value })}
                 />
                 <Button 
                   variant="contained" 
@@ -104,15 +178,15 @@ const SettingsPage = () => {
               <Typography variant="h6" gutterBottom>
                 Footer Settings
               </Typography>
-              <form onSubmit={handleFooterSubmit}>
+              <form onSubmit={handleSubmit}>
                 <TextField
                   label="Footer Text"
                   name="footerText"
                   variant="outlined"
                   fullWidth
                   margin="normal"
-                  value={footerSettings.footerText}
-                  onChange={handleFooterChange}
+                  value={settings.footerText}
+                  onChange={(e) => setSettings({ ...settings, footerText: e.target.value })}
                 />
                 <TextField
                   label="Copyright Text"
@@ -120,8 +194,8 @@ const SettingsPage = () => {
                   variant="outlined"
                   fullWidth
                   margin="normal"
-                  value={footerSettings.copyrightText}
-                  onChange={handleFooterChange}
+                  value={settings.copyrightText}
+                  onChange={(e) => setSettings({ ...settings, copyrightText: e.target.value })}
                 />
                 <Button 
                   variant="contained" 
@@ -137,6 +211,15 @@ const SettingsPage = () => {
           </Card>
         </Grid>
       </Grid>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
