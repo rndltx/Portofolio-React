@@ -18,7 +18,7 @@ import {
 import { Plus, Trash2, Upload, Edit2 } from 'lucide-react';
 
 interface Project {
-  id?: number;
+  id: number; // Make id required
   title: string;
   description: string;
   image_url: string;
@@ -28,7 +28,7 @@ interface Project {
   // UI states
   imageFile?: File | null;
   imagePreview?: string;
-  uploadProgress?: number;
+  uploadProgress: number;
 }
 
 // Add API types
@@ -42,10 +42,18 @@ interface ProjectApiData {
   technologies: string[];
 }
 
+// Add API response type
+interface ApiResponse {
+  data: ProjectApiData[];
+  success: boolean;
+  error?: string;
+}
+
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newProject, setNewProject] = useState<Project>({
+    id: 0,
     title: '',
     description: '',
     image_url: '/placeholder.svg?height=200&width=300',
@@ -63,16 +71,22 @@ const ProjectsPage = () => {
     fetchProjects();
   }, []);
 
+  // Update fetchProjects function with proper typing
   const fetchProjects = async () => {
     try {
       const response = await fetch('/api/projects');
-      const data = await response.json();
+      const data: ApiResponse = await response.json();
       
-      const transformedData = data.map(project => ({
-        ...project,
-        imagePreview: project.image_url,
-        uploadProgress: 0
-      }));
+      const transformedData: Project[] = data.data
+        .filter((project): project is ProjectApiData & { id: number } => 
+          typeof project.id === 'number'
+        )
+        .map(project => ({
+          ...project,
+          imagePreview: project.image_url,
+          uploadProgress: 0,
+          imageFile: null
+        }));
       
       setProjects(transformedData);
     } catch (error) {
@@ -96,6 +110,7 @@ const ProjectsPage = () => {
         setProjects([...projects, { ...newProject, id: Date.now() }]);
       }
       setNewProject({ 
+        id: 0,
         title: '', 
         description: '', 
         image_url: '/placeholder.svg?height=200&width=300',
@@ -115,10 +130,12 @@ const ProjectsPage = () => {
 
   const handleEditProject = (project: Project) => {
     setNewProject(project);
-    setEditingId(project.id);
+    setEditingId(project.id ?? null);
   };
 
-  const handleImageUpload = (id: number, file: File) => {
+  const handleImageUpload = (id: number | undefined, file: File) => {
+    if (typeof id === 'undefined') return;
+    
     const reader = new FileReader();
     reader.onload = (e) => {
       const imagePreview = e.target?.result as string;
@@ -305,7 +322,7 @@ const ProjectsPage = () => {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          handleImageUpload(newProject.id!, file);
+                          handleImageUpload(newProject.id, file);
                         }
                       }}
                     />

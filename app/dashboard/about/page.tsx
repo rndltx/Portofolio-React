@@ -13,16 +13,32 @@ import {
   Alert,
   LinearProgress // Add this import
 } from '@mui/material';
-import { Upload } from 'lucide-react';
+import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Update interfaces to match database schema
+// Add image preview component
+const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
+  <Box
+    component="img"
+    src={src}
+    alt={alt}
+    sx={{
+      width: '100%',
+      height: '200px',
+      objectFit: 'cover',
+      borderRadius: '8px',
+      mb: 2
+    }}
+  />
+);
+
+// Update interfaces 
 interface Slide {
-  id?: number;
+  id: number; // Make id required
   image_url: string;
   title: string;
   subtitle: string;
-  uploadProgress?: number;
+  uploadProgress: number; // Make required
   imageFile?: File | null;
   imagePreview?: string;
 }
@@ -35,6 +51,11 @@ interface AboutData {
   description: string;
   skills: string[];
   heroSlides: Slide[];
+}
+
+interface ApiError {
+  message: string;
+  code?: string;
 }
 
 const AboutPage = () => {
@@ -51,19 +72,19 @@ const AboutPage = () => {
     fetchAboutData();
   }, []);
 
-  // Update fetch function
+  // Update fetchAboutData function
   const fetchAboutData = async () => {
     try {
       const response = await fetch('/api/about');
       const data = await response.json();
       
-      // Transform data to match component state structure
-      const transformedData = {
+      // Transform data with proper typing
+      const transformedData: AboutData = {
         ...data,
         skills: Array.isArray(data.skills) ? data.skills : JSON.parse(data.skills || '[]'),
-        heroSlides: data.heroSlides.map(slide => ({
+        heroSlides: data.heroSlides.map((slide: Slide) => ({
           ...slide,
-          uploadProgress: 0,
+          uploadProgress: 0, // Set default value
           imageFile: null,
           imagePreview: slide.image_url
         }))
@@ -100,17 +121,28 @@ const AboutPage = () => {
     }));
   };
 
-  const handleImageUpload = (id: number, file: File) => {
+  // Update image upload handler
+  const handleImageUpload = (slideId: number | undefined, file: File) => {
+    if (typeof slideId === 'undefined') {
+      console.error('Slide ID is required');
+      setSnackbar({
+        open: true,
+        message: 'Error uploading image: Invalid slide',
+        severity: 'error'
+      });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const imagePreview = e.target?.result as string;
       setAboutData(prev => ({
         ...prev,
         heroSlides: prev.heroSlides.map(slide =>
-          slide.id === id ? { ...slide, imageFile: file, imagePreview, uploadProgress: 0 } : slide
+          slide.id === slideId ? { ...slide, imageFile: file, imagePreview, uploadProgress: 0 } : slide
         )
       }));
-      simulateUpload(id);
+      simulateUpload(slideId);
     };
     reader.readAsDataURL(file);
   };
@@ -129,6 +161,30 @@ const AboutPage = () => {
         clearInterval(interval);
       }
     }, 500);
+  };
+
+  // Add handler for new slides
+  const handleAddSlide = () => {
+    const newSlide: Slide = {
+      id: Date.now(), // Temporary ID until saved
+      title: '',
+      subtitle: '',
+      image_url: '/placeholder.jpg',
+      uploadProgress: 0,
+      imageFile: null,
+      imagePreview: '/placeholder.jpg'
+    };
+    setAboutData(prev => ({
+      ...prev,
+      heroSlides: [...prev.heroSlides, newSlide]
+    }));
+  };
+
+  const handleDeleteSlide = (id: number) => {
+    setAboutData(prev => ({
+      ...prev,
+      heroSlides: prev.heroSlides.filter(slide => slide.id !== id)
+    }));
   };
 
   // Update form submission
@@ -182,11 +238,16 @@ const AboutPage = () => {
       } else {
         throw new Error(data.error || 'Error updating data');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error updating about data:', error);
+      
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error as ApiError)?.message || 'Error updating data';
+        
       setSnackbar({ 
         open: true, 
-        message: error.message || 'Error updating data', 
+        message: errorMessage,
         severity: 'error' 
       });
     }
@@ -342,6 +403,17 @@ const AboutPage = () => {
             <Typography variant="h6" gutterBottom>
               Hero Slideshow
             </Typography>
+            <Box sx={{ mb: 3 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAddSlide}
+                startIcon={<Plus size={16} />}
+                size="small"
+              >
+                Add New Slide
+              </Button>
+            </Box>
             {(aboutData.heroSlides || []).map((slide, index) => (
               <Box 
                 key={slide.id} 
@@ -363,6 +435,12 @@ const AboutPage = () => {
                   <Grid item xs={12}>
                     <Typography variant="subtitle2">Slide {index + 1}</Typography>
                   </Grid>
+                  <Grid item xs={12}>
+                    <ImagePreview 
+                      src={slide.imagePreview || slide.image_url} 
+                      alt={slide.title} 
+                    />
+                  </Grid>
                   <Grid item xs={12} sm={6}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Button
@@ -378,7 +456,7 @@ const AboutPage = () => {
                           accept="image/*"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if (file) {
+                            if (file && slide.id) {
                               handleImageUpload(slide.id, file);
                             }
                           }}
@@ -388,9 +466,14 @@ const AboutPage = () => {
                         {slide.imageFile ? slide.imageFile.name : 'No file chosen'}
                       </Typography>
                     </Box>
-                    {slide.uploadProgress > 0 && slide.uploadProgress < 100 && (
+                    {typeof slide.uploadProgress === 'number' && 
+                      slide.uploadProgress > 0 && 
+                      slide.uploadProgress < 100 && (
                       <Box sx={{ width: '100%', mt: 1 }}>
-                        <LinearProgress variant="determinate" value={slide.uploadProgress} />
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={slide.uploadProgress} 
+                        />
                       </Box>
                     )}
                   </Grid>
@@ -429,6 +512,16 @@ const AboutPage = () => {
                     />
                   </Grid>
                 </Grid>
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    color="error"
+                    onClick={() => handleDeleteSlide(slide.id)}
+                    startIcon={<Trash2 size={16} />}
+                    size="small"
+                  >
+                    Delete Slide
+                  </Button>
+                </Box>
               </Box>
             ))}
           </CardContent>
