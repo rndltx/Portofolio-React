@@ -32,6 +32,14 @@ interface Project {
   technologies: string[];
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface ApiResponse {
+  success: boolean;
+  data?: Project[];
+  error?: string;
+}
+
 const ProjectsSection: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,13 +55,19 @@ const ProjectsSection: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('/api/projects');
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to fetch');
-      setProjects(data);
+      if (!API_URL) throw new Error('API URL not configured');
+
+      const response = await fetch(`${API_URL}/projects`);
+      const data: ApiResponse = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch projects');
+      }
+
+      setProjects(data.data || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
-      setError('Failed to load projects');
+      setError(error instanceof Error ? error.message : 'Failed to load projects');
     } finally {
       setIsLoading(false);
     }

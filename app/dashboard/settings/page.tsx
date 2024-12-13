@@ -31,6 +31,8 @@ interface ApiResponse {
 
 type CustomError = Error | { message: string };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const SettingsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<Settings>({
@@ -52,7 +54,9 @@ const SettingsPage = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/settings');
+      if (!API_URL) throw new Error('API URL not configured');
+
+      const response = await fetch(`${API_URL}/settings`);
       const data: ApiResponse = await response.json();
       
       if (!response.ok) {
@@ -81,7 +85,9 @@ const SettingsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/settings', {
+      if (!API_URL) throw new Error('API URL not configured');
+
+      const response = await fetch(`${API_URL}/settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings)

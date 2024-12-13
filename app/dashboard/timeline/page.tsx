@@ -20,12 +20,20 @@ import {
 } from '@mui/material';
 import { Plus, Trash2, School, Briefcase, Award, Star, Calendar, Flag } from 'lucide-react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface TimelineEvent {
   id?: number;
   title: string;
   date: string;
   description: string;
   icon: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data?: TimelineEvent[];
+  error?: string;
 }
 
 const iconOptions = [
@@ -52,14 +60,17 @@ const TimelinePage = () => {
 
   const fetchTimelineEvents = async () => {
     try {
-      const response = await fetch('/api/timeline');
-      const data = await response.json();
+      if (!API_URL) throw new Error('API URL not configured');
+
+      const response = await fetch(`${API_URL}/timeline`);
+      const data: ApiResponse = await response.json();
+      
       if (!response.ok) throw new Error(data.error || 'Failed to fetch');
-      setEvents(data);
+      setEvents(data.data || []);
     } catch (error) {
       console.error('Error fetching timeline:', error);
       setSnackbar({
-        open: true,
+        open: true, 
         message: 'Failed to load timeline data',
         severity: 'error'
       });
@@ -80,13 +91,15 @@ const TimelinePage = () => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch('/api/timeline', {
+      if (!API_URL) throw new Error('API URL not configured');
+
+      const response = await fetch(`${API_URL}/timeline`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(events)
       });
 
-      const data = await response.json();
+      const data: ApiResponse = await response.json();
       
       if (data.success) {
         setSnackbar({

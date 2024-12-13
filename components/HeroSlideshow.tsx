@@ -6,11 +6,28 @@ import { Box, Typography, Button, IconButton, CircularProgress } from '@mui/mate
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Add API URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface Slide {
   id: number;
   imageUrl: string;
   title: string;
   subtitle: string;
+}
+
+// Add interfaces
+interface ApiSlide {
+  id: number;
+  image_url: string;
+  title: string;
+  subtitle: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  heroSlides?: ApiSlide[];
+  error?: string;
 }
 
 const HeroSlideshow: React.FC = () => {
@@ -23,17 +40,29 @@ const HeroSlideshow: React.FC = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await fetch('/api/about');
-        const data = await response.json();
+        if (!API_URL) throw new Error('API URL not configured');
+
+        const response = await fetch(`${API_URL}/about`);
+        const data: ApiResponse = await response.json();
         
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch slides');
+        }
+
         if (data.heroSlides) {
-          setSlides(data.heroSlides);
+          const transformedSlides = data.heroSlides.map(slide => ({
+            id: slide.id,
+            imageUrl: slide.image_url,
+            title: slide.title,
+            subtitle: slide.subtitle
+          }));
+          setSlides(transformedSlides);
         } else {
           throw new Error('No slides data found');
         }
       } catch (error) {
         console.error('Error fetching slides:', error);
-        setError('Failed to load slides');
+        setError(error instanceof Error ? error.message : 'Failed to load slides');
       } finally {
         setIsLoading(false);
       }

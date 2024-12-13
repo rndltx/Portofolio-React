@@ -49,6 +49,9 @@ interface ApiResponse {
   error?: string;
 }
 
+// Add API base URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +77,9 @@ const ProjectsPage = () => {
   // Update fetchProjects function with proper typing
   const fetchProjects = async () => {
     try {
-      const response = await fetch('/api/projects');
+      if (!API_URL) throw new Error('API URL not configured');
+      
+      const response = await fetch(`${API_URL}/projects`);
       const data: ApiResponse = await response.json();
       
       const transformedData: Project[] = data.data
@@ -172,7 +177,10 @@ const ProjectsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const projectsToSubmit: ProjectApiData[] = await Promise.all(
+      if (!API_URL) throw new Error('API URL not configured');
+
+      // Handle image uploads
+      const projectsToSubmit = await Promise.all(
         projects.map(async (project) => {
           let finalImageUrl = project.image_url;
 
@@ -184,7 +192,7 @@ const ProjectsPage = () => {
               p.id === project.id ? { ...p, uploadProgress: 0 } : p
             ));
 
-            const uploadResponse = await fetch('/api/upload', {
+            const uploadResponse = await fetch(`${API_URL}/upload`, {
               method: 'POST',
               body: formData
             });
@@ -219,7 +227,8 @@ const ProjectsPage = () => {
         })
       );
 
-      const response = await fetch('/api/projects', {
+      // Submit projects data
+      const response = await fetch(`${API_URL}/projects`, {
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectsToSubmit)

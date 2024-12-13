@@ -15,18 +15,30 @@ import {
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+interface LoginResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      if (!API_URL) throw new Error('API URL not configured');
+
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,15 +46,23 @@ const LoginPage = () => {
         body: JSON.stringify({ username, password }),
       });
 
-      const data = await response.json();
+      const data: LoginResponse = await response.json();
 
-      if (data.success) {
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      if (data.success && data.token) {
+        // Store token
+        localStorage.setItem('token', data.token);
         router.push('/dashboard');
       } else {
-        setError(data.message);
+        throw new Error('Invalid response from server');
       }
-    } catch {
-      setError('An error occurred. Please try again.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -164,6 +184,7 @@ const LoginPage = () => {
                 color="primary"
                 fullWidth
                 size="large"
+                disabled={isLoading}
                 sx={{
                   mt: 3,
                   mb: 2,
@@ -180,7 +201,7 @@ const LoginPage = () => {
                   }
                 }}
               >
-                Login
+                {isLoading ? 'Logging in...' : 'Login'}
               </Button>
             </form>
           </Paper>

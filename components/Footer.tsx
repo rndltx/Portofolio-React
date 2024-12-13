@@ -1,13 +1,13 @@
 import React from 'react';
 import { Container, Typography, Link, Grid, Box, IconButton } from '@mui/material';
-import { GitHub, LinkedIn, Twitter, Email } from '@mui/icons-material';
+import { GitHub, LinkedIn, Instagram, Email } from '@mui/icons-material';
 
 const Footer = () => {
   const socialLinks = [
-    { icon: <GitHub />, url: "https://github.com" },
-    { icon: <LinkedIn />, url: "https://linkedin.com" },
-    { icon: <Twitter />, url: "https://twitter.com" },
-    { icon: <Email />, url: "mailto:your.email@example.com" },
+    { icon: <GitHub />, url: "https://github.com/rndltx" },
+    { icon: <LinkedIn />, url: "https://linkedin.com/khairun-rizaldy" },
+    { icon: <Instagram />, url: "https://instagram.com/rizsign" },
+    { icon: <Email />, url: "mailto:xnuxerx@gmail.com" },
   ];
 
   const quickLinks = [
@@ -31,10 +31,10 @@ const Footer = () => {
         <Grid container spacing={4}>
           <Grid item xs={12} md={4}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              My Portfolio
+              Khairun Rizaldy
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              Creating beautiful web experiences with modern technologies.
+              Membuat Website Menjadi Lebih Indah dan Menarik Dengan Experience Luar Biasa
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               {socialLinks.map((social, index) => (
@@ -87,10 +87,10 @@ const Footer = () => {
               Contact
             </Typography>
             <Typography variant="body2" paragraph>
-              Email: your.email@example.com
+              Email: xnuxerx@gmail.com
             </Typography>
             <Typography variant="body2" paragraph>
-              Location: Your City, Country
+              Location: Jl. Sagitarius III No 15H, Banjarbaru, Kalimantan Selatan
             </Typography>
           </Grid>
         </Grid>
@@ -104,7 +104,7 @@ const Footer = () => {
           }}
         >
           <Typography variant="body2">
-            © {new Date().getFullYear()} My Portfolio. All rights reserved.
+            © {new Date().getFullYear()} Khairun Rizaldy. All rights reserved.
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
             <Link 

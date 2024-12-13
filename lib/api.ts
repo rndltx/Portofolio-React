@@ -39,7 +39,7 @@ interface ApiResponse<T> {
   error?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://rizsign.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Auth
 export async function login(username: string, password: string): Promise<ApiResponse<{token: string}>> {

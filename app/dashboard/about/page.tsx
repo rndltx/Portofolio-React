@@ -16,6 +16,9 @@ import {
 import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+// Add API base URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 // Add image preview component
 const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
   <Box
@@ -75,7 +78,9 @@ const AboutPage = () => {
   // Update fetchAboutData function
   const fetchAboutData = async () => {
     try {
-      const response = await fetch('/api/about');
+      if (!API_URL) throw new Error('API URL not configured');
+      
+      const response = await fetch(`${API_URL}/about`);
       const data = await response.json();
       
       // Transform data with proper typing
@@ -191,6 +196,8 @@ const AboutPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!API_URL) throw new Error('API URL not configured');
+
       const updatedSlides = await Promise.all(aboutData.heroSlides.map(async (slide) => {
         if (slide.imageFile) {
           // Implement actual image upload here
@@ -198,7 +205,7 @@ const AboutPage = () => {
           formData.append('file', slide.imageFile);
           
           // Upload image and get URL
-          const uploadResponse = await fetch('/api/upload', {
+          const uploadResponse = await fetch(`${API_URL}/upload`, {
             method: 'POST',
             body: formData
           });
@@ -218,7 +225,7 @@ const AboutPage = () => {
         heroSlides: updatedSlides
       };
 
-      const response = await fetch('/api/about', {
+      const response = await fetch(`${API_URL}/about`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

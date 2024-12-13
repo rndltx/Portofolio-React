@@ -18,12 +18,20 @@ import {
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface AboutData {
   id?: number;
   name: string;
   title: string;
   description: string;
   skills: string[];
+}
+
+interface ApiResponse {
+  success: boolean;
+  data?: AboutData;
+  error?: string;
 }
 
 const AboutSection: React.FC = () => {
@@ -43,12 +51,19 @@ const AboutSection: React.FC = () => {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const response = await fetch('/api/about');
-        const data = await response.json();
-        setAboutData(data);
+        if (!API_URL) throw new Error('API URL not configured');
+
+        const response = await fetch(`${API_URL}/about`);
+        const data: ApiResponse = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch data');
+        }
+
+        setAboutData(data.data || null);
       } catch (error) {
         console.error('Error fetching about data:', error);
-        setError('Failed to load data');
+        setError(error instanceof Error ? error.message : 'Failed to load data');
       } finally {
         setIsLoading(false);
       }
@@ -68,14 +83,6 @@ const AboutSection: React.FC = () => {
       <Typography color="error">{error || 'No data available'}</Typography>
     </Box>;
   }
-
-  const skills = [
-    { name: 'Front-end Development', level: 90 },
-    { name: 'React & Next.js', level: 85 },
-    { name: 'UI/UX Design', level: 80 },
-    { name: 'Backend Development', level: 75 },
-    { name: 'Mobile Development', level: 70 },
-  ];
 
   return (
     <Box 
@@ -258,34 +265,12 @@ const AboutSection: React.FC = () => {
               </Typography>
 
               <Box sx={{ mb: 4 }}>
-                {skills.map((skill, index) => (
+                {aboutData.skills.map((skill, index) => (
                   <Box key={index} sx={{ mb: 3 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="body1" fontWeight={500}>
-                        {skill.name}
+                        {skill}
                       </Typography>
-                      <Typography variant="body2" color="primary">
-                        {skill.level}%
-                      </Typography>
-                    </Box>
-                    <Box 
-                      sx={{ 
-                        height: 8,
-                        borderRadius: 4,
-                        bgcolor: 'rgba(25, 118, 210, 0.1)',
-                        overflow: 'hidden'
-                      }}
-                    >
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${skill.level}%` }}
-                        transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
-                        style={{
-                          height: '100%',
-                          background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
-                          borderRadius: 4
-                        }}
-                      />
                     </Box>
                   </Box>
                 ))}

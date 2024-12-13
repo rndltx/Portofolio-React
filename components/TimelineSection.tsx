@@ -18,6 +18,15 @@ import TimelineDot from '@mui/lab/TimelineDot';
 import { School, Briefcase, Code, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+// Add API URL and interfaces
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface ApiResponse {
+  success: boolean;
+  data?: TimelineEvent[];
+  error?: string;
+}
+
 interface TimelineEvent {
   id?: number;
   title: string;
@@ -35,15 +44,22 @@ const TimelineSection: React.FC = () => {
     fetchTimeline();
   }, []);
 
+  // Update fetch function
   const fetchTimeline = async () => {
     try {
-      const response = await fetch('/api/timeline');
-      if (!response.ok) throw new Error('Failed to fetch timeline');
-      const data = await response.json();
-      setTimelineItems(data);
+      if (!API_URL) throw new Error('API URL not configured');
+
+      const response = await fetch(`${API_URL}/timeline`);
+      const data: ApiResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch timeline');
+      }
+
+      setTimelineItems(data.data || []);
     } catch (error) {
       console.error('Error fetching timeline:', error);
-      setError('Failed to load timeline');
+      setError(error instanceof Error ? error.message : 'Failed to load timeline');
     } finally {
       setIsLoading(false);
     }
