@@ -49,7 +49,12 @@ const TimelineSection: React.FC = () => {
     try {
       if (!API_URL) throw new Error('API URL not configured');
 
-      const response = await fetch(`${API_URL}/timeline`);
+      const response = await fetch(`${API_URL}/timeline`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       const data: ApiResponse = await response.json();
 
       if (!response.ok) {
