@@ -6,7 +6,16 @@ interface AboutData {
   name: string;
   title: string;
   description: string;
-  skills: string[];
+  skills: string; // Keep as string in DB interface
+}
+
+interface AboutResponse {
+  id?: number;
+  name: string;
+  title: string;
+  description: string;
+  skills: string[]; // Array in API response
+  heroSlides: HeroSlide[];
 }
 
 interface HeroSlide {
@@ -24,10 +33,25 @@ export async function GET() {
     const aboutData = aboutResults[0] || {};
     const heroSlides = slidesResults || [];
 
-    // Parse skills from JSON string
-    aboutData.skills = aboutData.skills ? JSON.parse(aboutData.skills) : [];
+    // Parse skills from JSON string with type checking
+    let parsedSkills: string[] = [];
+    try {
+      parsedSkills = aboutData.skills ? JSON.parse(aboutData.skills) : [];
+      if (!Array.isArray(parsedSkills)) {
+        parsedSkills = [];
+      }
+    } catch (e) {
+      console.error('Error parsing skills JSON:', e);
+      parsedSkills = [];
+    }
 
-    return NextResponse.json({ ...aboutData, heroSlides });
+    const response: AboutResponse = {
+      ...aboutData,
+      skills: parsedSkills,
+      heroSlides
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching about data:', error);
     return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
