@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
+  // Handle www/non-www redirects
+  if (request.headers.get('host')?.includes('rizsign.com')) {
+    return NextResponse.redirect(
+      `https://www.rizsign.com${request.nextUrl.pathname}`,
+      { status: 301 }
+    )
+  }
   const response = NextResponse.next()
 
   // Add CORS headers
