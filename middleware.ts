@@ -1,13 +1,5 @@
-import cors from 'cors';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-const corsMiddleware = cors({
-  origin: ['https://www.rizsign.com', 'https://rizsign.com'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization']
-});
 
 export function middleware(request: NextRequest) {
   // Handle CORS
