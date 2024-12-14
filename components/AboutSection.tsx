@@ -27,12 +27,14 @@ interface AboutData {
 }
 
 interface HeroSlide {
-  id: number;
-  image_url: string;
+  id?: number;
+  name: string;
   title: string;
-  subtitle: string;
+  description: string;
+  skills: string[];
   created_at?: string;
   updated_at?: string;
+  profile_image?: string;
 }
 
 interface ApiResponse {
