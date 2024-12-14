@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 // Update API URL for proper domain
 const API_URL = 'https://www.api.rizsign.com/api';
@@ -33,6 +34,19 @@ const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
       mb: 2
     }}
   />
+);
+
+// Add preview image component
+const ProfileImagePreview = ({ src, alt }: { src: string; alt: string }) => (
+  <Box sx={{ width: 100, height: 100, position: 'relative' }}>
+    <Image
+      src={src}
+      alt={alt}
+      layout="fill"
+      objectFit="cover"
+      className="rounded-full"
+    />
+  </Box>
 );
 
 // Update interfaces 
@@ -58,6 +72,7 @@ interface AboutData {
   heroSlides: HeroSlide[];
   created_at?: string;
   updated_at?: string;
+  profile_image?: string;
 }
 
 interface HeroSlide {
@@ -256,7 +271,8 @@ const AboutPage = () => {
             name: aboutData.name,
             title: aboutData.title,
             description: aboutData.description,
-            skills: aboutData.skills
+            skills: aboutData.skills,
+            profile_image: aboutData.profile_image
           },
           // Use updatedSlides for slides that had new images, fall back to existing slides for others
           heroSlides: aboutData.heroSlides.map(slide => {
@@ -423,6 +439,65 @@ const AboutPage = () => {
                     },
                   }}
                 />
+              </Grid>
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={<Upload size={16} />}
+                  >
+                    Upload Profile Image
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const formData = new FormData();
+                          formData.append('image', file);
+                          formData.append('type', 'profile');
+                          
+                          try {
+                            const response = await fetch(`${API_URL}/upload.php`, {
+                              method: 'POST',
+                              credentials: 'include',
+                              body: formData
+                            });
+                            
+                            if (!response.ok) throw new Error('Upload failed');
+                            
+                            const result = await response.json();
+                            setAboutData(prev => ({
+                              ...prev,
+                              profile_image: result.url
+                            }));
+
+                            setSnackbar({
+                              open: true,
+                              message: 'Profile image uploaded successfully',
+                              severity: 'success'
+                            });
+                          } catch (error) {
+                            console.error('Upload error:', error);
+                            setSnackbar({
+                              open: true,
+                              message: 'Failed to upload profile image',
+                              severity: 'error'
+                            });
+                          }
+                        }
+                      }}
+                    />
+                  </Button>
+                  {aboutData.profile_image && (
+                    <ProfileImagePreview 
+                      src={aboutData.profile_image} 
+                      alt={aboutData.name || 'Profile Preview'} 
+                    />
+                  )}
+                </Box>
               </Grid>
             </Grid>
           </CardContent>
