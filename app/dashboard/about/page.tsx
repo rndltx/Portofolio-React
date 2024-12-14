@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 
 // Update API URL for proper domain
 const API_URL = 'https://www.api.rizsign.com/api';
@@ -36,15 +35,27 @@ const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
   />
 );
 
-// Add preview image component
+// Update ProfileImagePreview component
 const ProfileImagePreview = ({ src, alt }: { src: string; alt: string }) => (
-  <Box sx={{ width: 100, height: 100, position: 'relative' }}>
-    <Image
+  <Box
+    sx={{
+      width: 100,
+      height: 100,
+      borderRadius: '50%',
+      overflow: 'hidden',
+      position: 'relative',
+      boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+      border: '3px solid white'
+    }}
+  >
+    <img
       src={src}
       alt={alt}
-      layout="fill"
-      objectFit="cover"
-      className="rounded-full"
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover'
+      }}
     />
   </Box>
 );
