@@ -27,19 +27,22 @@ interface Project {
   technologies: string[];
   created_at?: string;
   updated_at?: string;
+  // Client-side only fields
   imageFile?: File | null;
   imagePreview?: string;
   uploadProgress?: number;
 }
 
 interface ProjectApiData {
-  id?: number;
+  id: number;
   title: string;
   description: string;
   image_url: string;
-  project_url: string;
-  github_url: string;
+  project_url: string | null;
+  github_url: string | null;
   technologies: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 interface ApiResult<T> {
@@ -77,27 +80,24 @@ const ProjectsPage = () => {
   const fetchProjects = async () => {
     try {
       const response = await fetch(`${API_URL}/projects/index.php`, {
-        method: 'GET',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'Origin': 'https://www.rizsign.com'
+          'Accept': 'application/json',
         }
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch projects');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result: ApiResult<ProjectApiData[]> = await response.json();
       
-      if (!result.success) {
+      if (!result.success || !result.data) {
         throw new Error(result.error || 'Failed to fetch projects');
       }
 
-      const transformedData: Project[] = (result.data || []).map(project => ({
+      const transformedData: Project[] = result.data.map(project => ({
         ...project,
-        id: project.id || Date.now(),
         imagePreview: project.image_url,
         uploadProgress: 0,
         imageFile: null
@@ -105,7 +105,7 @@ const ProjectsPage = () => {
 
       setProjects(transformedData);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching projects:', error);
       setSnackbar({
         open: true,
         message: error instanceof Error ? error.message : 'Failed to fetch projects',
@@ -175,7 +175,6 @@ const ProjectsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Handle image uploads
       const updatedProjects = await Promise.all(
         projects.map(async (project) => {
           if (project.imageFile) {
@@ -193,6 +192,10 @@ const ProjectsPage = () => {
             }
 
             const uploadResult = await uploadResponse.json();
+            if (!uploadResult.success) {
+              throw new Error(uploadResult.message || 'Failed to upload image');
+            }
+
             return {
               ...project,
               image_url: uploadResult.url
@@ -202,7 +205,6 @@ const ProjectsPage = () => {
         })
       );
 
-      // Submit updated projects
       const response = await fetch(`${API_URL}/projects/index.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -218,8 +220,14 @@ const ProjectsPage = () => {
         })))
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
-      if (!result.success) throw new Error(result.message);
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update projects');
+      }
 
       setSnackbar({
         open: true,
