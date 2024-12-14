@@ -58,14 +58,24 @@ const LoginPage = () => {
         })
       });
 
-      const data: LoginResponse = await response.json();
+      const textResponse = await response.text();
+      let data: LoginResponse | ErrorResponse;
       
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Login failed');
+      try {
+        data = JSON.parse(textResponse);
+      } catch (parseError) {
+        console.error('Failed to parse response:', textResponse);
+        throw new Error('Server response error');
       }
 
-      if (data.session) {
-        sessionStorage.setItem('user', JSON.stringify(data.session));
+      if (!response.ok || !data.success) {
+        const errorData = data as ErrorResponse;
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      const loginData = data as LoginResponse;
+      if (loginData.session) {
+        sessionStorage.setItem('user', JSON.stringify(loginData.session));
         router.push('/dashboard');
       } else {
         throw new Error('Invalid session data');
