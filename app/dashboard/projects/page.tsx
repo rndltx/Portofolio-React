@@ -121,15 +121,22 @@ const ProjectsPage = () => {
   };
 
   const handleAddProject = () => {
-    if (newProject.title) {
-      if (editingId) {
-        setProjects(projects.map(p => p.id === editingId ? { ...newProject, id: editingId } : p));
-        setEditingId(null);
-      } else {
-        setProjects([...projects, { ...newProject, id: Date.now() }]);
-      }
-      setNewProject(newProjectDefault);
+    if (!newProject.title || !newProject.description) {
+      setSnackbar({
+        open: true,
+        message: 'Title and description are required',
+        severity: 'error'
+      });
+      return;
     }
+
+    if (editingId) {
+      setProjects(projects.map(p => p.id === editingId ? { ...newProject, id: editingId } : p));
+      setEditingId(null);
+    } else {
+      setProjects([...projects, { ...newProject, id: Date.now() }]);
+    }
+    setNewProject(newProjectDefault);
   };
 
   const handleRemoveProject = (id: number) => {
@@ -178,6 +185,18 @@ const ProjectsPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate all projects
+    const invalidProjects = projects.filter(p => !p.title || !p.description);
+    if (invalidProjects.length > 0) {
+      setSnackbar({
+        open: true,
+        message: 'All projects must have a title and description',
+        severity: 'error'
+      });
+      return;
+    }
+
     try {
       const updatedProjects = await Promise.all(
         projects.map(async (project) => {
@@ -422,7 +441,7 @@ const ProjectsPage = () => {
                   <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap', gap: 1 }}>
                     {project.technologies.map((tech, index) => (
                       <Chip
-                        key={index}
+                        key={`project-${project.id}-tech-${index}`}
                         label={tech}
                         size="small"
                         variant="outlined"
