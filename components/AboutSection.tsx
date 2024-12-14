@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { 
   Box, 
   Typography, 
@@ -233,17 +232,28 @@ const AboutSection: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Image
-                      src={aboutData.profile_image || FALLBACK_IMAGE} 
-                      alt={aboutData.name}
-                      layout="fill"
-                      objectFit="cover"
-                      className="rounded-full"
-                      style={{ 
-                        border: '4px solid white',
-                        boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)'
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        borderRadius: '50%',
                       }}
-                    />
+                    >
+                      <img
+                        src={aboutData.profile_image || FALLBACK_IMAGE}
+                        alt={aboutData.name}
+                        style={{ 
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          border: '4px solid white',
+                          boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
+                          borderRadius: '50%'
+                        }}
+                      />
+                    </Box>
                   </motion.div>
                 </Box>
 
