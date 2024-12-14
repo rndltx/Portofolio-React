@@ -23,15 +23,15 @@ import { Plus, Trash2, Upload, Edit2, Github } from 'lucide-react';
 
 interface Project {
   id: number;
-  title: string;
-  description: string;
-  image_url: string;
-  project_url: string | null;
-  github_url: string | null;
-  technologies: string[];
-  created_at?: string;
-  updated_at?: string;
-  // Client-side only fields
+  title: string; // varchar(255) NOT NULL
+  description: string; // text NOT NULL
+  image_url: string; // varchar(255) NOT NULL
+  project_url: string | null; // varchar(255) DEFAULT NULL
+  github_url: string | null; // varchar(255) DEFAULT NULL
+  technologies: string[]; // text NOT NULL (stored as JSON)
+  created_at?: string; // timestamp
+  updated_at?: string; // timestamp
+  // Client-side fields
   imageFile?: File | null;
   imagePreview?: string;
   uploadProgress?: number;
@@ -187,9 +187,23 @@ const ProjectsPage = () => {
     e.preventDefault();
     
     try {
-        // Filter out any projects without required fields
-        const validProjects = projects.filter(p => p.title && p.description);
+        const validProjects = projects.filter(p => {
+            // Match database NOT NULL constraints
+            if (!p.title || !p.description || !p.image_url) {
+                throw new Error('Title, description and image are required');
+            }
+            return true;
+        });
         
+        const projectsToSave = validProjects.map(p => ({
+            title: p.title.slice(0, 255), // Match varchar(255)
+            description: p.description,
+            image_url: p.image_url,
+            project_url: p.project_url?.slice(0, 255) || null,
+            github_url: p.github_url?.slice(0, 255) || null,
+            technologies: p.technologies || [] // Will be JSON encoded
+        }));
+
         const response = await fetch(`${API_URL}/projects/index.php`, {
             method: 'POST',
             headers: { 
@@ -197,14 +211,7 @@ const ProjectsPage = () => {
                 'Accept': 'application/json'
             },
             credentials: 'include',
-            body: JSON.stringify(validProjects.map(p => ({
-                title: p.title,
-                description: p.description,
-                image_url: p.image_url,
-                project_url: p.project_url || null,
-                github_url: p.github_url || null,
-                technologies: p.technologies || []
-            })))
+            body: JSON.stringify(projectsToSave)
         });
 
         if (!response.ok) {
