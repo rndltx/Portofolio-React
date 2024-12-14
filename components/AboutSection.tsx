@@ -17,8 +17,7 @@ import {
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { API_URL } from '@/lib/config';
 
 interface AboutData {
   id?: number;
@@ -51,23 +50,23 @@ const AboutSection: React.FC = () => {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        if (!API_URL) throw new Error('API URL not configured');
-
         const response = await fetch(`${API_URL}/about`, {
+          method: 'GET',
           credentials: 'include',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Origin': 'https://www.rizsign.com'
           }
         });
-        const data: ApiResponse = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch data');
+          throw new Error('Failed to fetch data');
         }
 
+        const data: ApiResponse = await response.json();
         setAboutData(data.data || null);
       } catch (error) {
-        console.error('Error fetching about data:', error);
+        console.error('Error:', error);
         setError(error instanceof Error ? error.message : 'Failed to load data');
       } finally {
         setIsLoading(false);
