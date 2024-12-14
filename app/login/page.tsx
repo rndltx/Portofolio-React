@@ -51,31 +51,32 @@ const LoginPage = () => {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ 
+          username: username.trim(), 
+          password: password 
+        }),
       });
 
-      let data: LoginResponse;
       const textResponse = await response.text();
       
       try {
-        data = JSON.parse(textResponse);
+        const data: LoginResponse = JSON.parse(textResponse);
+        
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Login failed');
+        }
+
+        if (data.session) {
+          sessionStorage.setItem('user', JSON.stringify(data.session));
+          router.push('/dashboard');
+        } else {
+          throw new Error('Invalid session data');
+        }
       } catch (parseError) {
         console.error('Raw response:', textResponse);
-        console.error('Parse error:', parseError);
-        throw new Error('Invalid JSON response from server');
-      }
-
-      if (!response.ok || !data.success) {
-        const errorData = data as ErrorResponse;
-        throw new Error(errorData.message || 'Login failed');
-      }
-
-      if (data.success && data.session) {
-        sessionStorage.setItem('user', JSON.stringify(data.session));
-        router.push('/dashboard');
-      } else {
-        throw new Error('Invalid response from server');
+        throw new Error('Server response error');
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
