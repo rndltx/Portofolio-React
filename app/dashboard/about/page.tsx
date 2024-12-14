@@ -235,6 +235,27 @@ const AboutPage = () => {
     e.preventDefault();
     
     try {
+      // Handle profile image upload first if changed
+      if (aboutData.profile_image && aboutData.profile_image.startsWith('data:')) {
+        const formData = new FormData();
+        const file = dataURLtoFile(aboutData.profile_image, 'profile.jpg');
+        formData.append('image', file);
+        formData.append('type', 'profile');
+        
+        const uploadResp = await fetch(`${API_URL}/upload.php`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+
+        if (!uploadResp.ok) {
+          throw new Error('Failed to upload profile image');
+        }
+
+        const uploadResult = await uploadResp.json();
+        aboutData.profile_image = uploadResult.url;
+      }
+
       // Handle image uploads first
       const uploadPromises = aboutData.heroSlides
         .filter(slide => slide.imageFile)
@@ -308,6 +329,32 @@ const AboutPage = () => {
         severity: 'error'
       });
     }
+  };
+
+  // Add helper function to convert Data URL to File
+  const dataURLtoFile = (dataurl: string, filename: string): File => {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || '';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
+  // Update upload handler
+  const handleProfileImageUpload = async (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imagePreview = e.target?.result as string;
+      setAboutData(prev => ({
+        ...prev,
+        profile_image: imagePreview
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -452,41 +499,10 @@ const AboutPage = () => {
                       type="file"
                       hidden
                       accept="image/*"
-                      onChange={async (e) => {
+                      onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          const formData = new FormData();
-                          formData.append('image', file);
-                          formData.append('type', 'profile');
-                          
-                          try {
-                            const response = await fetch(`${API_URL}/upload.php`, {
-                              method: 'POST',
-                              credentials: 'include',
-                              body: formData
-                            });
-                            
-                            if (!response.ok) throw new Error('Upload failed');
-                            
-                            const result = await response.json();
-                            setAboutData(prev => ({
-                              ...prev,
-                              profile_image: result.url
-                            }));
-
-                            setSnackbar({
-                              open: true,
-                              message: 'Profile image uploaded successfully',
-                              severity: 'success'
-                            });
-                          } catch (error) {
-                            console.error('Upload error:', error);
-                            setSnackbar({
-                              open: true,
-                              message: 'Failed to upload profile image',
-                              severity: 'error'
-                            });
-                          }
+                          handleProfileImageUpload(file);
                         }
                       }}
                     />
