@@ -50,14 +50,21 @@ const LoginPage = () => {
         body: JSON.stringify({ username, password }),
       });
 
-      const data: LoginResponse = await response.json();
+      let data: LoginResponse;
+      const textResponse = await response.text();
+      
+      try {
+        data = JSON.parse(textResponse);
+      } catch (e) {
+        console.error('Raw response:', textResponse);
+        throw new Error('Invalid JSON response from server');
+      }
 
       if (!response.ok || !data.success) {
         throw new Error(data.message || 'Login failed');
       }
 
       if (data.success && data.session) {
-        // Store session info
         sessionStorage.setItem('user', JSON.stringify(data.session));
         router.push('/dashboard');
       } else {
