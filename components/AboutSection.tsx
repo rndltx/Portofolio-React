@@ -116,9 +116,7 @@ const AboutSection: React.FC = () => {
         const { about } = result.data;
 
         // Construct proper image URL
-        const profileImage = about.profile_image 
-          ? `https://www.api.rizsign.com/uploads/${about.profile_image}`
-          : FALLBACK_IMAGE;
+        const profileImage = about.profile_image
         
         setAboutData({
           ...about,
