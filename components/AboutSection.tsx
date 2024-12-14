@@ -50,7 +50,7 @@ const AboutSection: React.FC = () => {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const response = await fetch(`${API_URL}/about`, {
+        const response = await fetch(`${API_URL}/about/index.php`, {
           method: 'GET',
           credentials: 'include',
           headers: {

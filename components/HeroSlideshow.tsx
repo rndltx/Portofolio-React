@@ -42,7 +42,7 @@ const HeroSlideshow: React.FC = () => {
       try {
         if (!API_URL) throw new Error('API URL not configured');
 
-        const response = await fetch(`${API_URL}/about`, {
+        const response = await fetch(`${API_URL}/about/index.php`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
