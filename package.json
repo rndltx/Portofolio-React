@@ -36,7 +36,8 @@
     "react-dom": "^18",
     "tailwind": "^4.0.0",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "web-vitals": "^4.2.4"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -16,7 +16,7 @@ import {
 import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Update API URL constant
+// Update API URL for proper domain
 const API_URL = 'https://www.api.rizsign.com/api';
 
 // Add image preview component
@@ -75,10 +75,11 @@ const AboutPage = () => {
     try {
       const response = await fetch(`${API_URL}/about`, {
         method: 'GET',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-        },
-        credentials: 'include'
+          'Origin': 'https://www.rizsign.com'
+        }
       });
 
       if (!response.ok) {
@@ -204,11 +205,10 @@ const AboutPage = () => {
     e.preventDefault();
     
     try {
-      const formData = new FormData();
-
-      // Upload images first
+      // Handle image uploads first
       for (const slide of aboutData.heroSlides) {
         if (slide.imageFile) {
+          const formData = new FormData();
           formData.append('image', slide.imageFile);
           formData.append('slideId', slide.id.toString());
           
@@ -224,13 +224,14 @@ const AboutPage = () => {
         }
       }
 
-      // Submit data
+      // Submit about data
       const response = await fetch(`${API_URL}/about`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'Origin': 'https://www.rizsign.com'
         },
-        credentials: 'include',
         body: JSON.stringify({
           name: aboutData.name,
           title: aboutData.title,

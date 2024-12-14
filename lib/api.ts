@@ -43,24 +43,29 @@ const API_URL = 'https://www.api.rizsign.com/api';
 
 // API client helper
 export const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Origin': 'https://www.rizsign.com',
-      ...options.headers,
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
-  }
-
   try {
-    return await response.json();
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': 'https://www.rizsign.com',
+        ...options.headers,
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.error || `API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error('Invalid response format from server');
   }
 };
