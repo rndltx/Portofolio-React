@@ -338,9 +338,10 @@ const ProjectsPage = () => {
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                       <Chip
-                        {...getTagProps({ index })}
+                        key={`tech-tag-${index}`}
                         label={option}
                         size="small"
+                        onDelete={getTagProps({ index }).onDelete}
                       />
                     ))
                   }
