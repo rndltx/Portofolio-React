@@ -48,6 +48,29 @@ interface ApiResponse {
 const API_URL = 'https://www.api.rizsign.com/api';
 const FALLBACK_IMAGE = '/placeholder.jpg';
 
+const SkillTag = ({ skill }: { skill: string }) => (
+  <Box
+    sx={{
+      display: 'inline-block',
+      m: 0.5,
+      px: 3,
+      py: 1,
+      borderRadius: '50px',
+      backgroundColor: 'rgba(25, 118, 210, 0.1)',
+      color: 'primary.main',
+      fontWeight: 500,
+      fontSize: '0.9rem',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        backgroundColor: 'rgba(25, 118, 210, 0.15)',
+      }
+    }}
+  >
+    {skill}
+  </Box>
+);
+
 const AboutSection: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [aboutData, setAboutData] = useState<AboutData>({
@@ -152,7 +175,7 @@ const AboutSection: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         py: 12,
-        background: '#ffffff',  // Changed to white
+        background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
       }}
     >
       <Container maxWidth="lg">
@@ -161,7 +184,7 @@ const AboutSection: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
             >
               <Paper 
                 elevation={0} 
@@ -278,7 +301,7 @@ const AboutSection: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
             >
               <Typography 
                 variant="h3" 
@@ -294,46 +317,65 @@ const AboutSection: React.FC = () => {
                     width: '80px',
                     height: '4px',
                     background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
-                    borderRadius: '2px'
+                    borderRadius: '2px',
+                    animation: 'pulse 2s infinite',
                   }
                 }}
               >
                 About Me
               </Typography>
 
-              <Typography 
-                variant="body1" 
-                sx={{
-                  fontSize: '1.2rem',
-                  lineHeight: 1.8,
-                  color: 'text.secondary',
-                  mb: 4
-                }}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
               >
-                {aboutData.description}
-              </Typography>
+                <Typography 
+                  variant="body1" 
+                  sx={{
+                    fontSize: '1.2rem',
+                    lineHeight: 1.8,
+                    color: 'text.secondary',
+                    mb: 4,
+                    textAlign: 'justify'
+                  }}
+                >
+                  {aboutData.description}
+                </Typography>
+              </motion.div>
 
               <Typography 
                 variant="h5" 
                 sx={{ 
                   mb: 3,
-                  fontWeight: 700
+                  fontWeight: 700,
+                  background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
                 }}
               >
                 Technical Expertise
               </Typography>
 
-              <Box sx={{ mb: 4 }}>
-                {aboutData.skills.map((skill, index) => (
-                  <Box key={index} sx={{ mb: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body1" fontWeight={500}>
-                        {skill}
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+              >
+                <Box 
+                  sx={{ 
+                    mb: 4,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1
+                  }}
+                >
+                  {aboutData.skills.map((skill, index) => (
+                    <SkillTag key={index} skill={skill} />
+                  ))}
+                </Box>
+              </motion.div>
             </motion.div>
           </Grid>
         </Grid>
@@ -343,12 +385,19 @@ const AboutSection: React.FC = () => {
           onClose={handleClose} 
           maxWidth="md" 
           fullWidth
+          TransitionProps={{
+            timeout: {
+              enter: 500,
+              exit: 300
+            }
+          }}
           PaperProps={{
             sx: {
               borderRadius: '24px',
               p: 3,
               background: 'rgba(255, 255, 255, 0.95)',
               backdropFilter: 'blur(10px)',
+              boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',
             }
           }}
         >
@@ -394,6 +443,14 @@ const AboutSection: React.FC = () => {
           </DialogContent>
         </Dialog>
       </Container>
+
+      <style jsx global>{`
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.7; }
+          100% { opacity: 1; }
+        }
+      `}</style>
     </Box>
   );
 };
