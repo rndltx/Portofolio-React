@@ -37,13 +37,15 @@ const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
 
 // Update interfaces 
 interface Slide {
-  id: number; // Make id required
+  id: number;
   image_url: string;
   title: string;
   subtitle: string;
-  uploadProgress: number; // Make required
-  imageFile?: File | null;
+  uploadProgress: number;
+  imageFile?: File;
   imagePreview?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Update interfaces to match database schema
@@ -53,7 +55,21 @@ interface AboutData {
   title: string;
   description: string;
   skills: string[];
-  heroSlides: Slide[];
+  heroSlides: HeroSlide[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface HeroSlide {
+  id: number;
+  image_url: string;
+  title: string;
+  subtitle: string;
+  created_at?: string;
+  updated_at?: string;
+  uploadProgress?: number;
+  imageFile?: File;
+  imagePreview?: string;
 }
 
 const AboutPage = () => {
@@ -74,39 +90,38 @@ const AboutPage = () => {
   const fetchAboutData = async () => {
     try {
       const response = await fetch(`${API_URL}/about/index.php`, {
-        method: 'GET',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Origin': 'https://www.rizsign.com'
         }
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch data');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const result = await response.json();
       
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to fetch data');
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch data');
       }
 
+      // Transform data to match component state
       const transformedData: AboutData = {
-        ...data.data,
-        skills: Array.isArray(data.data.skills) ? data.data.skills : [],
-        heroSlides: (data.data.heroSlides || []).map((slide: Slide) => ({
+        ...result.data.about,
+        skills: Array.isArray(result.data.about.skills) 
+          ? result.data.about.skills 
+          : JSON.parse(result.data.about.skills || '[]'),
+        heroSlides: result.data.heroSlides.map((slide: HeroSlide) => ({
           ...slide,
           uploadProgress: 0,
-          imageFile: null,
           imagePreview: slide.image_url
         }))
       };
 
       setAboutData(transformedData);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Fetch error:', error);
       setSnackbar({
         open: true,
         message: error instanceof Error ? error.message : 'Failed to fetch data',
@@ -179,13 +194,12 @@ const AboutPage = () => {
 
   // Add handler for new slides
   const handleAddSlide = () => {
-    const newSlide: Slide = {
-      id: Date.now(), // Temporary ID until saved
+    const newSlide: HeroSlide = {
+      id: Date.now(),
       title: '',
       subtitle: '',
       image_url: '/placeholder.jpg',
       uploadProgress: 0,
-      imageFile: null,
       imagePreview: '/placeholder.jpg'
     };
     setAboutData(prev => ({
@@ -207,50 +221,60 @@ const AboutPage = () => {
     
     try {
       // Handle image uploads first
-      for (const slide of aboutData.heroSlides) {
-        if (slide.imageFile) {
+      const uploadPromises = aboutData.heroSlides
+        .filter(slide => slide.imageFile)
+        .map(async (slide) => {
           const formData = new FormData();
-          formData.append('image', slide.imageFile);
+          formData.append('image', slide.imageFile as File);
           formData.append('slideId', slide.id.toString());
           
-          const uploadResponse = await fetch(`${API_URL}/upload`, {
+          const response = await fetch(`${API_URL}/upload.php`, {
             method: 'POST',
-            body: formData,
-            credentials: 'include'
+            credentials: 'include',
+            body: formData
           });
 
-          if (!uploadResponse.ok) {
-            throw new Error('Failed to upload image');
+          if (!response.ok) {
+            throw new Error(`Failed to upload image for slide ${slide.id}`);
           }
-        }
-      }
 
-      // Submit about data
+          const result = await response.json();
+          return { ...slide, image_url: result.url };
+        });
+
+      const updatedSlides = await Promise.all(uploadPromises);
+
+      // Update about data with new image URLs
       const response = await fetch(`${API_URL}/about/index.php`, {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'Origin': 'https://www.rizsign.com'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: aboutData.name,
-          title: aboutData.title,
-          description: aboutData.description,
-          skills: aboutData.skills,
-          heroSlides: aboutData.heroSlides.map(slide => ({
-            id: slide.id,
-            image_url: slide.image_url,
-            title: slide.title,
-            subtitle: slide.subtitle
-          }))
+          about: {
+            name: aboutData.name,
+            title: aboutData.title,
+            description: aboutData.description,
+            skills: aboutData.skills
+          },
+          // Use updatedSlides for slides that had new images, fall back to existing slides for others
+          heroSlides: aboutData.heroSlides.map(slide => {
+            const updatedSlide = updatedSlides.find(us => us.id === slide.id);
+            return {
+              id: slide.id,
+              image_url: updatedSlide ? updatedSlide.image_url : slide.image_url,
+              title: slide.title,
+              subtitle: slide.subtitle
+            };
+          })
         })
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to update data');
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update data');
       }
 
       setSnackbar({
@@ -261,7 +285,7 @@ const AboutPage = () => {
 
       fetchAboutData();
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Submit error:', error);
       setSnackbar({
         open: true,
         message: error instanceof Error ? error.message : 'Failed to update data',
