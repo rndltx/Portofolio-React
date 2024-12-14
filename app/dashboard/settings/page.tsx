@@ -52,7 +52,7 @@ const SettingsPage = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch(`${API_URL}/settings`, {
+      const response = await fetch(`${API_URL}/settings/index.php`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
@@ -91,7 +91,7 @@ const SettingsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL}/settings`, {
+      const response = await fetch(`${API_URL}/settings/index.php`, {
         method: 'POST',
         credentials: 'include',
         headers: {

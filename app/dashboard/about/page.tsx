@@ -226,7 +226,7 @@ const AboutPage = () => {
       }
 
       // Submit about data
-      const response = await fetch(`${API_URL}/about`, {
+      const response = await fetch(`${API_URL}/about/index.php`, {
         method: 'POST',
         credentials: 'include',
         headers: {

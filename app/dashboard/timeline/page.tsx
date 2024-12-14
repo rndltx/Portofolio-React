@@ -102,7 +102,7 @@ const TimelinePage = () => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`${API_URL}/timeline`, {
+      const response = await fetch(`${API_URL}/timeline/index.php`, {
         method: 'POST',
         credentials: 'include',
         headers: { 
