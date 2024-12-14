@@ -15,13 +15,18 @@ import {
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const API_URL = 'https://www.rizsign.com/api';
+
 interface LoginResponse {
   success: boolean;
   message?: string;
-  token?: string;
+  session?: {
+    id: number;
+    username: string;
+    isLoggedIn: boolean;
+    loginTime: string;
+  };
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -36,8 +41,6 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      if (!API_URL) throw new Error('API URL not configured');
-
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         credentials: 'include',
@@ -49,13 +52,13 @@ const LoginPage = () => {
 
       const data: LoginResponse = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         throw new Error(data.message || 'Login failed');
       }
 
-      if (data.success && data.token) {
-        // Store token
-        localStorage.setItem('token', data.token);
+      if (data.success && data.session) {
+        // Store session info
+        sessionStorage.setItem('user', JSON.stringify(data.session));
         router.push('/dashboard');
       } else {
         throw new Error('Invalid response from server');

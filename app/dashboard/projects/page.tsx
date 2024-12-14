@@ -18,20 +18,18 @@ import {
 import { Plus, Trash2, Upload, Edit2 } from 'lucide-react';
 
 interface Project {
-  id: number; // Make id required
+  id: number;
   title: string;
   description: string;
   image_url: string;
   project_url: string;
   github_url: string;
   technologies: string[];
-  // UI states
   imageFile?: File | null;
   imagePreview?: string;
   uploadProgress: number;
 }
 
-// Add API types
 interface ProjectApiData {
   id?: number;
   title: string;
@@ -42,15 +40,13 @@ interface ProjectApiData {
   technologies: string[];
 }
 
-// Add API response type
-interface ApiResponse {
-  data: ProjectApiData[];
+interface ApiResult<T> {
   success: boolean;
+  data?: T;
   error?: string;
 }
 
-// Add API base URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = 'https://www.rizsign.com/api';
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -74,37 +70,41 @@ const ProjectsPage = () => {
     fetchProjects();
   }, []);
 
-  // Update fetchProjects function with proper typing
   const fetchProjects = async () => {
     try {
-      if (!API_URL) throw new Error('API URL not configured');
-      
       const response = await fetch(`${API_URL}/projects`, {
-        credentials: 'include',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
-      const data: ApiResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects');
+      }
+
+      const result: ApiResult<ProjectApiData[]> = await response.json();
       
-      const transformedData: Project[] = data.data
-        .filter((project): project is ProjectApiData & { id: number } => 
-          typeof project.id === 'number'
-        )
-        .map(project => ({
-          ...project,
-          imagePreview: project.image_url,
-          uploadProgress: 0,
-          imageFile: null
-        }));
-      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch projects');
+      }
+
+      const transformedData: Project[] = (result.data || []).map(project => ({
+        ...project,
+        id: project.id || Date.now(),
+        imagePreview: project.image_url,
+        uploadProgress: 0,
+        imageFile: null
+      }));
+
       setProjects(transformedData);
     } catch (error) {
-      console.error('Error fetching projects:', error);
-      setSnackbar({ 
-        open: true, 
-        message: 'Error fetching projects', 
-        severity: 'error' 
+      console.error('Error:', error);
+      setSnackbar({
+        open: true,
+        message: error instanceof Error ? error.message : 'Failed to fetch projects',
+        severity: 'error'
       });
     } finally {
       setIsLoading(false);
@@ -178,87 +178,63 @@ const ProjectsPage = () => {
     }, 500);
   };
 
-  // Update handleSubmit to properly use UI states
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!API_URL) throw new Error('API URL not configured');
+      for (const project of projects) {
+        if (project.imageFile) {
+          const formData = new FormData();
+          formData.append('image', project.imageFile);
+          formData.append('projectId', project.id.toString());
+          
+          const uploadResponse = await fetch(`${API_URL}/upload`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
 
-      // Handle image uploads
-      const projectsToSubmit = await Promise.all(
-        projects.map(async (project) => {
-          let finalImageUrl = project.image_url;
-
-          if (project.imageFile) {
-            const formData = new FormData();
-            formData.append('file', project.imageFile);
-            
-            setProjects(prev => prev.map(p => 
-              p.id === project.id ? { ...p, uploadProgress: 0 } : p
-            ));
-
-            const uploadResponse = await fetch(`${API_URL}/upload`, {
-              method: 'POST',
-              credentials: 'include',
-              body: formData
-            });
-            
-            if (!uploadResponse.ok) {
-              throw new Error('Failed to upload image');
-            }
-
-            const { imageUrl } = await uploadResponse.json();
-            finalImageUrl = imageUrl;
-
-            setProjects(prev => prev.map(p => 
-              p.id === project.id ? { 
-                ...p, 
-                uploadProgress: 100,
-                imagePreview: imageUrl,
-                image_url: imageUrl
-              } : p
-            ));
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload image');
           }
+        }
+      }
 
-          // Return only API data
-          return {
-            id: project.id,
-            title: project.title,
-            description: project.description,
-            image_url: finalImageUrl,
-            project_url: project.project_url,
-            github_url: project.github_url,
-            technologies: project.technologies
-          };
-        })
-      );
-
-      // Submit projects data
       const response = await fetch(`${API_URL}/projects`, {
-        method: 'POST', 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectsToSubmit)
+        body: JSON.stringify(projects.map(project => ({
+          id: project.id,
+          title: project.title,
+          description: project.description,
+          image_url: project.image_url,
+          project_url: project.project_url,
+          github_url: project.github_url,
+          technologies: project.technologies
+        })))
       });
 
       const data = await response.json();
 
-      if (data.success) {
-        setSnackbar({ 
-          open: true, 
-          message: 'Projects updated successfully', 
-          severity: 'success' 
-        });
-        fetchProjects();
-      } else {
-        throw new Error(data.error || 'Error updating projects');
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to update projects');
       }
+
+      setSnackbar({
+        open: true,
+        message: 'Projects updated successfully',
+        severity: 'success'
+      });
+
+      fetchProjects();
     } catch (error) {
-      console.error('Error saving projects:', error);
-      setSnackbar({ 
-        open: true, 
-        message: 'Error saving projects', 
-        severity: 'error' 
+      console.error('Error:', error);
+      setSnackbar({
+        open: true,
+        message: error instanceof Error ? error.message : 'Failed to update projects',
+        severity: 'error'
       });
     }
   };

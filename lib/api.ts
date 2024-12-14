@@ -39,12 +39,13 @@ interface ApiResponse<T> {
   error?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = 'https://www.rizsign.com/api';
 
 // Auth
 export async function login(username: string, password: string): Promise<ApiResponse<{token: string}>> {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -55,13 +56,19 @@ export async function login(username: string, password: string): Promise<ApiResp
 
 // About
 export async function fetchAboutData(): Promise<ApiResponse<AboutData>> {
-  const response = await fetch(`${API_URL}/about`);
+  const response = await fetch(`${API_URL}/about`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
   return response.json();
 }
 
 export async function updateAboutData(data: AboutData): Promise<ApiResponse<AboutData>> {
   const response = await fetch(`${API_URL}/about`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -72,13 +79,19 @@ export async function updateAboutData(data: AboutData): Promise<ApiResponse<Abou
 
 // Timeline
 export async function fetchTimelineData(): Promise<ApiResponse<TimelineEvent[]>> {
-  const response = await fetch(`${API_URL}/timeline`);
+  const response = await fetch(`${API_URL}/timeline`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
   return response.json();
 }
 
 export async function updateTimelineData(data: TimelineEvent[]): Promise<ApiResponse<TimelineEvent[]>> {
   const response = await fetch(`${API_URL}/timeline`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -89,13 +102,19 @@ export async function updateTimelineData(data: TimelineEvent[]): Promise<ApiResp
 
 // Projects
 export async function fetchProjectsData(): Promise<ApiResponse<Project[]>> {
-  const response = await fetch(`${API_URL}/projects`);
+  const response = await fetch(`${API_URL}/projects`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
   return response.json();
 }
 
 export async function updateProjectsData(data: Project[]): Promise<ApiResponse<Project[]>> {
   const response = await fetch(`${API_URL}/projects`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -106,13 +125,19 @@ export async function updateProjectsData(data: Project[]): Promise<ApiResponse<P
 
 // Settings
 export async function fetchSettingsData(): Promise<ApiResponse<Settings>> {
-  const response = await fetch(`${API_URL}/settings`);
+  const response = await fetch(`${API_URL}/settings`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
   return response.json();
 }
 
 export async function updateSettingsData(data: Settings): Promise<ApiResponse<Settings>> {
   const response = await fetch(`${API_URL}/settings`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },

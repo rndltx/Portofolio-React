@@ -23,15 +23,13 @@ interface Settings {
   copyrightText: string;
 }
 
-interface ApiResponse {
+interface ApiResult<T> {
   success: boolean;
   error?: string;
-  data?: Settings;
+  data?: T;
 }
 
-type CustomError = Error | { message: string };
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = 'https://www.rizsign.com/api';
 
 const SettingsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -54,32 +52,35 @@ const SettingsPage = () => {
 
   const fetchSettings = async () => {
     try {
-      if (!API_URL) throw new Error('API URL not configured');
-
       const response = await fetch(`${API_URL}/settings`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      const data: ApiResponse = await response.json();
-      
+
       if (!response.ok) {
+        throw new Error('Failed to fetch settings');
+      }
+
+      const data: ApiResult<Settings> = await response.json();
+      
+      if (!data.success) {
         throw new Error(data.error || 'Failed to load settings');
       }
-      
+
       setSettings(data.data || {
         name: '',
         email: '',
         bio: '',
-        footerText: '',
+        footerText: '', 
         copyrightText: ''
       });
-    } catch (error: unknown) {
-      const customError = error as CustomError;
+    } catch (error) {
+      console.error('Error:', error);
       setSnackbar({
         open: true,
-        message: customError.message || 'Failed to load settings',
+        message: error instanceof Error ? error.message : 'Failed to load settings',
         severity: 'error'
       });
     } finally {
@@ -90,20 +91,18 @@ const SettingsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!API_URL) throw new Error('API URL not configured');
-
       const response = await fetch(`${API_URL}/settings`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 
-          'Content-Type': 'application/json' 
+        headers: {
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(settings)
       });
-      
-      const data: ApiResponse = await response.json();
-      
-      if (!response.ok) {
+
+      const data = await response.json();
+
+      if (!data.success) {
         throw new Error(data.error || 'Failed to update settings');
       }
 
@@ -112,11 +111,13 @@ const SettingsPage = () => {
         message: 'Settings updated successfully',
         severity: 'success'
       });
-    } catch (error: unknown) {
-      const customError = error as CustomError;
+
+      fetchSettings();
+    } catch (error) {
+      console.error('Error:', error);
       setSnackbar({
         open: true,
-        message: customError.message || 'Failed to update settings',
+        message: error instanceof Error ? error.message : 'Failed to update settings',
         severity: 'error'
       });
     }

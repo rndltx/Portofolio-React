@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { Plus, Trash2, School, Briefcase, Award, Star, Calendar, Flag } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = 'https://www.rizsign.com/api';
 
 interface TimelineEvent {
   id?: number;
@@ -30,9 +30,9 @@ interface TimelineEvent {
   icon: string;
 }
 
-interface ApiResponse {
+interface ApiResult<T> {
   success: boolean;
-  data?: TimelineEvent[];
+  data?: T;
   error?: string;
 }
 
@@ -60,23 +60,29 @@ const TimelinePage = () => {
 
   const fetchTimelineEvents = async () => {
     try {
-      if (!API_URL) throw new Error('API URL not configured');
-
       const response = await fetch(`${API_URL}/timeline`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      const data: ApiResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch timeline');
+      }
+
+      const data: ApiResult<TimelineEvent[]> = await response.json();
       
-      if (!response.ok) throw new Error(data.error || 'Failed to fetch');
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to load timeline');
+      }
+
       setEvents(data.data || []);
     } catch (error) {
-      console.error('Error fetching timeline:', error);
+      console.error('Error:', error);
       setSnackbar({
-        open: true, 
-        message: 'Failed to load timeline data',
+        open: true,
+        message: error instanceof Error ? error.message : 'Failed to load timeline',
         severity: 'error'
       });
     } finally {
@@ -96,8 +102,6 @@ const TimelinePage = () => {
 
   const handleSave = async () => {
     try {
-      if (!API_URL) throw new Error('API URL not configured');
-
       const response = await fetch(`${API_URL}/timeline`, {
         method: 'POST',
         credentials: 'include',
@@ -107,23 +111,24 @@ const TimelinePage = () => {
         body: JSON.stringify(events)
       });
 
-      const data: ApiResponse = await response.json();
-      
-      if (data.success) {
-        setSnackbar({
-          open: true,
-          message: 'Timeline saved successfully',
-          severity: 'success'
-        });
-        fetchTimelineEvents();
-      } else {
-        throw new Error(data.error || 'Failed to save');
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to update timeline');
       }
-    } catch (error) {
-      console.error('Error saving timeline:', error);
+
       setSnackbar({
         open: true,
-        message: 'Failed to save timeline',
+        message: 'Timeline updated successfully',
+        severity: 'success'
+      });
+
+      fetchTimelineEvents();
+    } catch (error) {
+      console.error('Error:', error);
+      setSnackbar({
+        open: true,
+        message: error instanceof Error ? error.message : 'Failed to update timeline',
         severity: 'error'
       });
     }

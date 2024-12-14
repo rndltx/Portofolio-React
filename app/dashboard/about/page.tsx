@@ -16,8 +16,8 @@ import {
 import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Add API base URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Update API URL constant
+const API_URL = 'https://www.rizsign.com/api';
 
 // Add image preview component
 const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
@@ -56,11 +56,6 @@ interface AboutData {
   heroSlides: Slide[];
 }
 
-interface ApiError {
-  message: string;
-  code?: string;
-}
-
 const AboutPage = () => {
   const [aboutData, setAboutData] = useState<AboutData>({
     name: '',
@@ -78,23 +73,30 @@ const AboutPage = () => {
   // Update fetch calls with credentials
   const fetchAboutData = async () => {
     try {
-      if (!API_URL) throw new Error('API URL not configured');
-      
       const response = await fetch(`${API_URL}/about`, {
-        credentials: 'include',
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+
       const data = await response.json();
       
-      // Transform data with proper typing
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch data');
+      }
+
       const transformedData: AboutData = {
-        ...data,
-        skills: Array.isArray(data.skills) ? data.skills : JSON.parse(data.skills || '[]'),
-        heroSlides: data.heroSlides.map((slide: Slide) => ({
+        ...data.data,
+        skills: Array.isArray(data.data.skills) ? data.data.skills : [],
+        heroSlides: (data.data.heroSlides || []).map((slide: Slide) => ({
           ...slide,
-          uploadProgress: 0, // Set default value
+          uploadProgress: 0,
           imageFile: null,
           imagePreview: slide.image_url
         }))
@@ -102,11 +104,11 @@ const AboutPage = () => {
 
       setAboutData(transformedData);
     } catch (error) {
-      console.error('Error fetching about data:', error);
-      setSnackbar({ 
-        open: true, 
-        message: 'Error fetching data', 
-        severity: 'error' 
+      console.error('Error:', error);
+      setSnackbar({
+        open: true,
+        message: error instanceof Error ? error.message : 'Failed to fetch data',
+        severity: 'error'
       });
     }
   };
@@ -200,68 +202,68 @@ const AboutPage = () => {
   // Update fetch calls with credentials
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     try {
-      if (!API_URL) throw new Error('API URL not configured');
+      const formData = new FormData();
 
-      const updatedSlides = await Promise.all(aboutData.heroSlides.map(async (slide) => {
+      // Upload images first
+      for (const slide of aboutData.heroSlides) {
         if (slide.imageFile) {
-          // Implement actual image upload here
-          const formData = new FormData();
-          formData.append('file', slide.imageFile);
+          formData.append('image', slide.imageFile);
+          formData.append('slideId', slide.id.toString());
           
-          // Upload image and get URL
           const uploadResponse = await fetch(`${API_URL}/upload`, {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'include'
           });
-          
-          const { imageUrl } = await uploadResponse.json();
-          
-          return {
-            ...slide,
-            image_url: imageUrl
-          };
+
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload image');
+          }
         }
-        return slide;
-      }));
+      }
 
-      const dataToSubmit = {
-        ...aboutData,
-        heroSlides: updatedSlides
-      };
-
+      // Submit data
       const response = await fetch(`${API_URL}/about`, {
         method: 'POST',
-        credentials: 'include', 
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dataToSubmit),
+        credentials: 'include',
+        body: JSON.stringify({
+          name: aboutData.name,
+          title: aboutData.title,
+          description: aboutData.description,
+          skills: aboutData.skills,
+          heroSlides: aboutData.heroSlides.map(slide => ({
+            id: slide.id,
+            image_url: slide.image_url,
+            title: slide.title,
+            subtitle: slide.subtitle
+          }))
+        })
       });
 
       const data = await response.json();
-      
-      if (data.success) {
-        setSnackbar({ 
-          open: true, 
-          message: 'About data updated successfully', 
-          severity: 'success' 
-        });
-        fetchAboutData(); // Refresh data
-      } else {
-        throw new Error(data.error || 'Error updating data');
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to update data');
       }
-    } catch (error: unknown) {
-      console.error('Error updating about data:', error);
-      
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : (error as ApiError)?.message || 'Error updating data';
-        
-      setSnackbar({ 
-        open: true, 
-        message: errorMessage,
-        severity: 'error' 
+
+      setSnackbar({
+        open: true,
+        message: 'Data updated successfully',
+        severity: 'success'
+      });
+
+      fetchAboutData();
+    } catch (error) {
+      console.error('Error:', error);
+      setSnackbar({
+        open: true,
+        message: error instanceof Error ? error.message : 'Failed to update data',
+        severity: 'error'
       });
     }
   };
