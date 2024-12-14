@@ -13,9 +13,13 @@ import {
   LinearProgress,
   Snackbar,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Chip,
+  Stack,
+  Autocomplete,
+  Link
 } from '@mui/material';
-import { Plus, Trash2, Upload, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Upload, Edit2, Github } from 'lucide-react';
 
 interface Project {
   id: number;
@@ -59,7 +63,7 @@ const newProjectDefault: Project = {
   description: '',
   image_url: '/placeholder.jpg',
   project_url: '',
-  github_url: '',
+  github_url: null,
   technologies: [],
   imageFile: null,
   imagePreview: '/placeholder.jpg',
@@ -293,6 +297,46 @@ const ProjectsPage = () => {
                   onChange={(e) => setNewProject({ ...newProject, project_url: e.target.value })}
                 />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="GitHub URL"
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  value={newProject.github_url || ''}
+                  onChange={(e) => setNewProject({ ...newProject, github_url: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Autocomplete
+                  multiple
+                  freeSolo
+                  options={[]}
+                  value={newProject.technologies}
+                  onChange={(_, newValue) => {
+                    setNewProject({ ...newProject, technologies: newValue });
+                  }}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        label={option}
+                        {...getTagProps({ index })}
+                        size="small"
+                      />
+                    ))
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      label="Technologies"
+                      placeholder="Add technology"
+                      size="small"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <TextField
                   label="Project Description"
@@ -375,9 +419,31 @@ const ProjectsPage = () => {
                   <Typography variant="body2" color="text.secondary">
                     {project.description}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    URL: {project.project_url}
-                  </Typography>
+                  <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap', gap: 1 }}>
+                    {project.technologies.map((tech, index) => (
+                      <Chip
+                        key={index}
+                        label={tech}
+                        size="small"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Stack>
+                  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                    {project.project_url && (
+                      <Typography variant="body2" color="text.secondary">
+                        Demo: <Link href={project.project_url} target="_blank" rel="noopener">{project.project_url}</Link>
+                      </Typography>
+                    )}
+                    {project.github_url && (
+                      <Typography variant="body2" color="text.secondary">
+                        <Github size={16} style={{ verticalAlign: 'middle' }} />
+                        <Link href={project.github_url} target="_blank" rel="noopener" sx={{ ml: 1 }}>
+                          GitHub
+                        </Link>
+                      </Typography>
+                    )}
+                  </Stack>
                 </CardContent>
                 <CardActions>
                   <Button size="small" startIcon={<Edit2 size={16} />} onClick={() => handleEditProject(project)}>Edit</Button>
