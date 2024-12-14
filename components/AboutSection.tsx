@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
-import { API_URL } from '@/lib/config';
 
 interface AboutData {
   id?: number;
@@ -32,6 +31,8 @@ interface ApiResponse {
   data?: AboutData;
   error?: string;
 }
+// Update API URL for proper domain
+const API_URL = 'https://www.api.rizsign.com/api';
 
 const AboutSection: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -50,7 +51,7 @@ const AboutSection: React.FC = () => {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const response = await fetch(`https://www.api.rizsign.com/about/index.php`, {
+        const response = await fetch(`${API_URL}/about/index.php`, {
           method: 'GET',
           credentials: 'include',
           headers: {
