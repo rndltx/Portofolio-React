@@ -136,14 +136,27 @@ const AboutPage = () => {
       const transformedData: AboutData = {
         ...result.data.about,
         // Fix profile image URL construction
-        profile_image: result.data.about.profile_image || '/placeholder.jpg',
+        profile_image: result.data.about.profile_image
+          ? (result.data.about.profile_image.startsWith('http')
+            ? result.data.about.profile_image
+            : `${API_URL}/uploads/${result.data.about.profile_image}`)
+          : '/placeholder.jpg',
         skills: Array.isArray(result.data.about.skills) 
           ? result.data.about.skills 
           : JSON.parse(result.data.about.skills || '[]'),
         heroSlides: result.data.heroSlides.map((slide: HeroSlide) => ({
           ...slide,
+          image_url: slide.image_url
+            ? (slide.image_url.startsWith('http')
+              ? slide.image_url
+              : `${API_URL}/uploads/${slide.image_url}`)
+            : '/placeholder.jpg',
           uploadProgress: 0,
           imagePreview: slide.image_url
+            ? (slide.image_url.startsWith('http')
+              ? slide.image_url
+              : `${API_URL}/uploads/${slide.image_url}`)
+            : '/placeholder.jpg'
         }))
       };
 
