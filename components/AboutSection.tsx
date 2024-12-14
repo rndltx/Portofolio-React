@@ -91,7 +91,6 @@ const ProfileContainer = ({ aboutData }: { aboutData: AboutData }) => (
         borderRadius: '50%',
         animation: 'spin 20s linear infinite',
         background: 'linear-gradient(45deg, rgba(25, 118, 210, 0.1), rgba(66, 165, 245, 0.1))',
-        backdropFilter: 'blur(8px)',
       },
       '&::after': {
         content: '""',
@@ -112,6 +111,12 @@ const ProfileContainer = ({ aboutData }: { aboutData: AboutData }) => (
         stiffness: 260,
         damping: 20
       }}
+      style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '50%',
+        overflow: 'hidden'
+      }}
     >
       <Box
         sx={{
@@ -119,33 +124,20 @@ const ProfileContainer = ({ aboutData }: { aboutData: AboutData }) => (
           height: '100%',
           position: 'relative',
           borderRadius: '50%',
+          overflow: 'hidden',
+          padding: 1,
           background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
-          padding: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          border: '4px solid rgba(255, 255, 255, 0.8)',
           boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            borderRadius: '50%',
-            padding: '4px',
-            background: 'linear-gradient(45deg, #42a5f5, #1976d2)',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
-          }
         }}
       >
-        <Box
-          sx={{
+        <motion.div
+          style={{
             width: '100%',
             height: '100%',
-            overflow: 'hidden',
             borderRadius: '50%',
-            border: '4px solid rgba(255, 255, 255, 0.8)',
-            background: '#fff',
+            overflow: 'hidden',
+            background: '#fff'
           }}
         >
           <motion.img
@@ -155,13 +147,12 @@ const ProfileContainer = ({ aboutData }: { aboutData: AboutData }) => (
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              borderRadius: '50%',
             }}
             initial={{ scale: 1 }}
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.3 }}
           />
-        </Box>
+        </motion.div>
       </Box>
     </motion.div>
   </Box>
