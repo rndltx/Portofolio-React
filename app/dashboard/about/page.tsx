@@ -11,7 +11,7 @@ import {
   CardContent, 
   Snackbar,
   Alert,
-  LinearProgress // Add this import
+  LinearProgress 
 } from '@mui/material';
 import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -104,7 +104,7 @@ const AboutPage = () => {
     title: '',
     description: '',
     skills: [],
-    heroSlides: [], // Ensure initialized as empty array
+    heroSlides: [], 
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
@@ -248,7 +248,8 @@ const AboutPage = () => {
     e.preventDefault();
     
     try {
-      // Update handleSubmit function profile image section
+      // Handle profile image upload if it's a data URL
+      let profileImageUrl = aboutData.profile_image;
       if (aboutData.profile_image && aboutData.profile_image.startsWith('data:')) {
         const formData = new FormData();
         const file = dataURLtoFile(aboutData.profile_image, 'profile.jpg');
@@ -266,10 +267,13 @@ const AboutPage = () => {
         }
 
         const uploadResult = await uploadResp.json();
-        aboutData.profile_image = uploadResult.url;
+        profileImageUrl = uploadResult.url;
+      } else if (profileImageUrl && profileImageUrl.startsWith(API_URL)) {
+        // If it's a full URL, extract just the filename
+        profileImageUrl = profileImageUrl.split('/').pop() || '';
       }
 
-      // Handle image uploads first
+      // Handle image uploads for hero slides
       const uploadPromises = aboutData.heroSlides
         .filter(slide => slide.imageFile)
         .map(async (slide) => {
@@ -306,14 +310,13 @@ const AboutPage = () => {
             title: aboutData.title,
             description: aboutData.description,
             skills: aboutData.skills,
-            profile_image: aboutData.profile_image
+            profile_image: profileImageUrl
           },
-          // Use updatedSlides for slides that had new images, fall back to existing slides for others
           heroSlides: aboutData.heroSlides.map(slide => {
             const updatedSlide = updatedSlides.find(us => us.id === slide.id);
             return {
               id: slide.id,
-              image_url: updatedSlide ? updatedSlide.image_url : slide.image_url,
+              image_url: updatedSlide ? updatedSlide.image_url : (slide.image_url.split('/').pop() || ''),
               title: slide.title,
               subtitle: slide.subtitle
             };
@@ -488,7 +491,7 @@ const AboutPage = () => {
                   label="Skills (comma-separated)"
                   fullWidth
                   name="skills"
-                  value={aboutData.skills?.join(', ') || ''} // Add null check and fallback
+                  value={aboutData.skills?.join(', ') || ''} 
                   onChange={handleSkillsChange}
                   sx={{
                     '& .MuiOutlinedInput-root': {
