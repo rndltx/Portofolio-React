@@ -78,10 +78,10 @@ const ProfileContainer = ({ aboutData }: { aboutData: AboutData }) => (
   <Box 
     sx={{
       position: 'relative',
-      width: 280,
-      height: 280,
+      width: { xs: 220, sm: 280 },
+      height: { xs: 220, sm: 280 },
       mx: 'auto',
-      mb: 6,
+      mb: { xs: 4, sm: 6 },
       '&::before': {
         content: '""',
         position: 'absolute',
@@ -91,6 +91,7 @@ const ProfileContainer = ({ aboutData }: { aboutData: AboutData }) => (
         borderRadius: '50%',
         animation: 'spin 20s linear infinite',
         background: 'linear-gradient(45deg, rgba(25, 118, 210, 0.1), rgba(66, 165, 245, 0.1))',
+        backdropFilter: 'blur(8px)',
       },
       '&::after': {
         content: '""',
@@ -117,24 +118,50 @@ const ProfileContainer = ({ aboutData }: { aboutData: AboutData }) => (
           width: '100%',
           height: '100%',
           position: 'relative',
-          overflow: 'hidden',
           borderRadius: '50%',
           background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
-          padding: '4px', // Creates border effect
+          padding: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            padding: '4px',
+            background: 'linear-gradient(45deg, #42a5f5, #1976d2)',
+            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+          }
         }}
       >
-        <img
-          src={aboutData.profile_image || FALLBACK_IMAGE}
-          alt={aboutData.name}
-          style={{ 
+        <Box
+          sx={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            overflow: 'hidden',
             borderRadius: '50%',
-            border: '4px solid white',
-            boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
+            border: '4px solid rgba(255, 255, 255, 0.8)',
+            background: '#fff',
           }}
-        />
+        >
+          <motion.img
+            src={aboutData.profile_image || FALLBACK_IMAGE}
+            alt={aboutData.name}
+            style={{ 
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '50%',
+            }}
+            initial={{ scale: 1 }}
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.3 }}
+          />
+        </Box>
       </Box>
     </motion.div>
   </Box>
@@ -247,8 +274,18 @@ const AboutSection: React.FC = () => {
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
-        py: 12,
+        py: { xs: 8, sm: 12 },
         background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          width: '200%',
+          height: '200%',
+          background: 'radial-gradient(circle, rgba(25, 118, 210, 0.05) 0%, transparent 50%)',
+          animation: 'gradientMove 15s ease infinite',
+        }
       }}
     >
       <Container maxWidth="lg">
@@ -262,11 +299,11 @@ const AboutSection: React.FC = () => {
               <Paper 
                 elevation={0} 
                 sx={{
-                  p: 8,
+                  p: { xs: 4, sm: 6, md: 8 },
                   textAlign: 'center',
                   borderRadius: '24px',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(10px)',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(12px)',
                   boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',
                   transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -496,6 +533,11 @@ const AboutSection: React.FC = () => {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+
+        @keyframes gradientMove {
+          0% { transform: translate(-50%, -50%) rotate(0deg); }
+          100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
       `}</style>
     </Box>
