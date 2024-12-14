@@ -23,6 +23,8 @@ interface AboutData {
   title: string;
   description: string;
   skills: string[];
+  created_at?: string;
+  updated_at?: string;
   profile_image?: string;
 }
 
@@ -47,7 +49,7 @@ interface ApiResponse {
 }
 
 const API_URL = 'https://www.api.rizsign.com/api';
-const FALLBACK_IMAGE = '/placeholder.jpg';
+const FALLBACK_IMAGE = 'https://www.api.rizsign.com/uploads/placeholder.jpg';
 
 const SkillTag = ({ skill }: { skill: string }) => (
   <Box
@@ -112,9 +114,15 @@ const AboutSection: React.FC = () => {
         }
 
         const { about } = result.data;
+
+        // Construct proper image URL
+        const profileImage = about.profile_image 
+          ? `https://www.api.rizsign.com/uploads/${about.profile_image}`
+          : FALLBACK_IMAGE;
         
         setAboutData({
           ...about,
+          profile_image: profileImage,
           skills: Array.isArray(about.skills) ? about.skills : JSON.parse(about.skills || '[]')
         });
       } catch (error) {
