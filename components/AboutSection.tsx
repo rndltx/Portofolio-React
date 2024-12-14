@@ -17,13 +17,14 @@ import {
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
 
+// Update AboutData interface
 interface AboutData {
   id?: number;
   name: string;
   title: string;
   description: string;
   skills: string[];
-  profile_image?: string;
+  profile_image?: string | null;
 }
 
 interface HeroSlide {
@@ -89,6 +90,7 @@ const AboutSection: React.FC = () => {
     setOpen(false);
   };
 
+  // Update profile image handling in useEffect
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
@@ -113,6 +115,7 @@ const AboutSection: React.FC = () => {
         
         setAboutData({
           ...about,
+          profile_image: about.profile_image || FALLBACK_IMAGE,
           skills: Array.isArray(about.skills) ? about.skills : JSON.parse(about.skills || '[]')
         });
       } catch (error) {
@@ -241,9 +244,14 @@ const AboutSection: React.FC = () => {
                         borderRadius: '50%',
                       }}
                     >
+                      {/* Update image rendering with error handling */}
                       <img
                         src={aboutData.profile_image || FALLBACK_IMAGE}
                         alt={aboutData.name}
+                        onError={(e) => {
+                          const img = e.target as HTMLImageElement;
+                          img.src = FALLBACK_IMAGE;
+                        }}
                         style={{ 
                           width: '100%',
                           height: '100%',
