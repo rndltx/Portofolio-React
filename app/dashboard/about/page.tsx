@@ -136,7 +136,10 @@ const AboutPage = () => {
       const transformedData: AboutData = {
         ...result.data.about,
         // Fix profile image URL construction
-        profile_image: result.data.about.profile_image || '/placeholder.jpg',
+        profile_image: result.data.about.profile_image && 
+          result.data.about.profile_image.startsWith('http') 
+          ? result.data.about.profile_image 
+          : `${API_URL}/${result.data.about.profile_image}`,
         skills: Array.isArray(result.data.about.skills) 
           ? result.data.about.skills 
           : JSON.parse(result.data.about.skills || '[]'),
