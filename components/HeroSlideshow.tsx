@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Box, Typography, Button, IconButton, CircularProgress } from '@mui/material';
+import { Box, Typography, Button, IconButton, CircularProgress, Skeleton } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Update API URL for proper domain
 const API_URL = 'https://www.api.rizsign.com/api';
+const FALLBACK_IMAGE = '/placeholder.jpg';
 
 interface Slide {
   id: number;
@@ -16,17 +16,17 @@ interface Slide {
   subtitle: string;
 }
 
-// Add interfaces
-interface ApiSlide {
-  id: number;
-  image_url: string;
-  title: string;
-  subtitle: string;
-}
-
 interface ApiResponse {
   success: boolean;
-  heroSlides?: ApiSlide[];
+  data?: {
+    about: any;
+    heroSlides: Array<{
+      id: number;
+      image_url: string;
+      title: string;
+      subtitle: string;
+    }>;
+  };
   error?: string;
 }
 
@@ -40,32 +40,31 @@ const HeroSlideshow: React.FC = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        if (!API_URL) throw new Error('API URL not configured');
-
         const response = await fetch(`${API_URL}/about/index.php`, {
           credentials: 'include',
           headers: {
-            'Content-Type': 'application/json'
+            'Accept': 'application/json',
           }
         });
         
-        const data: ApiResponse = await response.json();
-        
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch slides');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        if (data.heroSlides) {
-          const transformedSlides = data.heroSlides.map(slide => ({
-            id: slide.id,
-            imageUrl: slide.image_url,
-            title: slide.title,
-            subtitle: slide.subtitle
-          }));
-          setSlides(transformedSlides);
-        } else {
-          throw new Error('No slides data found');
+        const data: ApiResponse = await response.json();
+        
+        if (!data.success || !data.data?.heroSlides) {
+          throw new Error('Failed to fetch slides data');
         }
+
+        const transformedSlides = data.data.heroSlides.map(slide => ({
+          id: slide.id,
+          imageUrl: slide.image_url || FALLBACK_IMAGE,
+          title: slide.title,
+          subtitle: slide.subtitle
+        }));
+
+        setSlides(transformedSlides);
       } catch (error) {
         console.error('Error fetching slides:', error);
         setError(error instanceof Error ? error.message : 'Failed to load slides');
@@ -88,17 +87,22 @@ const HeroSlideshow: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Box className="w-full h-screen flex items-center justify-center">
-        <CircularProgress />
+      <Box className="w-full h-screen">
+        <Skeleton 
+          variant="rectangular" 
+          width="100%" 
+          height="100%"
+          animation="wave"
+        />
       </Box>
     );
   }
 
   if (error || slides.length === 0) {
     return (
-      <Box className="w-full h-screen flex items-center justify-center">
-        <Typography variant="h5" color="error">
-          {error || 'No slides available'}
+      <Box className="w-full h-screen flex items-center justify-center bg-gray-100">
+        <Typography variant="h5" color="error" align="center">
+          {error || 'No slides available. Please add some slides in the dashboard.'}
         </Typography>
       </Box>
     );

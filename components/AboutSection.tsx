@@ -13,7 +13,8 @@ import {
   Paper,
   Container,
   IconButton,
-  CircularProgress
+  CircularProgress,
+  Skeleton
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
@@ -24,19 +25,29 @@ interface AboutData {
   title: string;
   description: string;
   skills: string[];
+  profile_image?: string;
 }
 
 interface ApiResponse {
   success: boolean;
-  data?: AboutData;
+  data?: {
+    about: AboutData;
+    heroSlides: any[];
+  };
   error?: string;
 }
-// Update API URL for proper domain
+
 const API_URL = 'https://www.api.rizsign.com/api';
+const FALLBACK_IMAGE = '/placeholder.jpg';
 
 const AboutSection: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const [aboutData, setAboutData] = useState<AboutData | null>(null);
+  const [aboutData, setAboutData] = useState<AboutData>({
+    name: '',
+    title: '',
+    description: '',
+    skills: [],
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -52,20 +63,28 @@ const AboutSection: React.FC = () => {
     const fetchAboutData = async () => {
       try {
         const response = await fetch(`${API_URL}/about/index.php`, {
-          method: 'GET',
           credentials: 'include',
           headers: {
-            'Content-Type': 'application/json',
-            'Origin': 'https://www.rizsign.com'
+            'Accept': 'application/json',
           }
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch data');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data: ApiResponse = await response.json();
-        setAboutData(data.data || null);
+        const result: ApiResponse = await response.json();
+        
+        if (!result.success || !result.data?.about) {
+          throw new Error(result.error || 'Failed to fetch data');
+        }
+
+        const { about } = result.data;
+        
+        setAboutData({
+          ...about,
+          skills: Array.isArray(about.skills) ? about.skills : JSON.parse(about.skills || '[]')
+        });
       } catch (error) {
         console.error('Error:', error);
         setError(error instanceof Error ? error.message : 'Failed to load data');
@@ -78,15 +97,42 @@ const AboutSection: React.FC = () => {
   }, []);
 
   if (isLoading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-      <CircularProgress />
-    </Box>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 12 }}>
+        <Grid container spacing={8}>
+          <Grid item xs={12} md={6}>
+            <Skeleton variant="circular" width={280} height={280} sx={{ mx: 'auto', mb: 4 }} />
+            <Skeleton variant="text" width="80%" height={60} sx={{ mx: 'auto', mb: 2 }} />
+            <Skeleton variant="text" width="60%" height={40} sx={{ mx: 'auto', mb: 4 }} />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Skeleton variant="text" height={80} sx={{ mb: 4 }} />
+            <Skeleton variant="text" height={200} sx={{ mb: 4 }} />
+            <Skeleton variant="text" height={40} sx={{ mb: 2 }} />
+            {[1,2,3].map((_, i) => (
+              <Skeleton key={i} variant="text" height={30} sx={{ mb: 2 }} />
+            ))}
+          </Grid>
+        </Grid>
+      </Container>
+    );
   }
 
-  if (error || !aboutData) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-      <Typography color="error">{error || 'No data available'}</Typography>
-    </Box>;
+  if (error) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        p: 4,
+        textAlign: 'center'
+      }}>
+        <Typography variant="h5" color="error">
+          {error}
+        </Typography>
+      </Box>
+    );
   }
 
   return (
@@ -157,8 +203,7 @@ const AboutSection: React.FC = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <Image
-                      src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}/profile.jpg`} 
-                      // or use dynamic path from API: aboutData.profile_image
+                      src={aboutData.profile_image || FALLBACK_IMAGE} 
                       alt={aboutData.name}
                       layout="fill"
                       objectFit="cover"
