@@ -50,38 +50,29 @@ const LoginPage = () => {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
           username: username.trim(), 
-          password: password 
-        }),
+          password 
+        })
       });
 
-      const textResponse = await response.text();
+      const data: LoginResponse = await response.json();
       
-      try {
-        const data: LoginResponse | ErrorResponse = JSON.parse(textResponse);
-        
-        if (!response.ok || !data.success) {
-          const errorData = data as ErrorResponse;
-          throw new Error(errorData.message || 'Login failed');
-        }
-
-        const loginData = data as LoginResponse;
-        if (loginData.session) {
-          sessionStorage.setItem('user', JSON.stringify(loginData.session));
-          router.push('/dashboard');
-        } else {
-          throw new Error('Invalid session data');
-        }
-      } catch (parseError) {
-        console.error('Parse error details:', parseError);
-        console.error('Raw server response:', textResponse);
-        throw new Error('Server response error');
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Login failed');
       }
+
+      if (data.session) {
+        sessionStorage.setItem('user', JSON.stringify(data.session));
+        router.push('/dashboard');
+      } else {
+        throw new Error('Invalid session data');
+      }
+
     } catch (error) {
+      console.error('Login error:', error);
       setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsLoading(false);
