@@ -76,7 +76,8 @@ const ProjectsPage = () => {
         method: 'GET',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Origin': 'https://www.rizsign.com'
         }
       });
 

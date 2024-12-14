@@ -14,16 +14,16 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/api/:path*',  // Menentukan pola path untuk API
+        source: '/api/:path*',
         headers: [
-          { key: 'Access-Control-Allow-Origin', value: 'https://www.rizsign.com' },  // Menentukan asal yang diizinkan
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },  // Metode yang diizinkan
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type,Authorization' },  // Header yang diizinkan
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },  // Mengizinkan kredensial
+          { key: 'Access-Control-Allow-Origin', value: 'https://www.rizsign.com' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type' },
+          { key: 'Access-Control-Allow-Credentials', value: 'true' }
         ],
       },
-    ];
-  },
-};
+    ]
+  }
+}
 
 module.exports = nextConfig;

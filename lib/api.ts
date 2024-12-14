@@ -39,7 +39,7 @@ interface ApiResponse<T> {
   error?: string;
 }
 
-const API_URL = 'https://rizsign.com/api';  // Remove www.api subdomain
+const API_URL = 'https://www.api.rizsign.com/api';
 
 // API client helper
 export const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
@@ -49,7 +49,7 @@ export const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Origin': 'https://rizsign.com',
+      'Origin': 'https://www.rizsign.com',
       ...options.headers,
     }
   });
@@ -58,7 +58,11 @@ export const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
     throw new Error(`API error: ${response.status}`);
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch (error) {
+    throw new Error('Invalid response format from server');
+  }
 };
 
 // Auth
