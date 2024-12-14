@@ -50,7 +50,7 @@ const AboutSection: React.FC = () => {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const response = await fetch(`${API_URL}/about/index.php`, {
+        const response = await fetch(`https://www.api.rizsign.com/about/index.php`, {
           method: 'GET',
           credentials: 'include',
           headers: {

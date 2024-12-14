@@ -32,7 +32,7 @@ interface Project {
   technologies: string[];
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = 'https://www.api.rizsign.com/api';
 
 interface ApiResponse {
   success: boolean;
