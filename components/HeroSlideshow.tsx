@@ -6,8 +6,8 @@ import { Box, Typography, Button, IconButton, CircularProgress } from '@mui/mate
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Add API URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Update API URL for proper domain
+const API_URL = 'https://www.api.rizsign.com/api';
 
 interface Slide {
   id: number;
