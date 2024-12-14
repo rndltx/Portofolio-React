@@ -136,8 +136,7 @@ const AboutPage = () => {
       const transformedData: AboutData = {
         ...result.data.about,
         // Fix profile image URL construction
-        profile_image: result.data.about.profile_image 
-          ? `https://www.api.rizsign.com/uploads/${encodeURIComponent(result.data.about.profile_image)}`: '',
+        profile_image: result.data.about.profile_image || '/placeholder.jpg',
         skills: Array.isArray(result.data.about.skills) 
           ? result.data.about.skills 
           : JSON.parse(result.data.about.skills || '[]'),
