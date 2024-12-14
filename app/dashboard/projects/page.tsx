@@ -200,7 +200,7 @@ const ProjectsPage = () => {
         }
       }
 
-      const response = await fetch(`${API_URL}/projects`, {
+      const response = await fetch(`${API_URL}/projects/index.php`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
