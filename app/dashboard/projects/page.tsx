@@ -74,10 +74,10 @@ const ProjectsPage = () => {
     try {
       const response = await fetch(`${API_URL}/projects`, {
         method: 'GET',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
-        },
-        credentials: 'include'
+        }
       });
 
       if (!response.ok) {

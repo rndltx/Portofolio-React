@@ -15,7 +15,7 @@ import {
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const API_URL = 'https://www.rizsign.com/api';
+const API_URL = 'https://www.api.rizsign.com/api';
 
 interface LoginResponse {
   success: boolean;
