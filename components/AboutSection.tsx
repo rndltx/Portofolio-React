@@ -17,14 +17,13 @@ import {
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
 
-// Update AboutData interface
 interface AboutData {
   id?: number;
   name: string;
   title: string;
   description: string;
   skills: string[];
-  profile_image?: string | null;
+  profile_image?: string;
 }
 
 interface HeroSlide {
@@ -46,7 +45,7 @@ interface ApiResponse {
 }
 
 const API_URL = 'https://www.api.rizsign.com/api';
-const FALLBACK_IMAGE = '/placeholder.jpg';
+const FALLBACK_IMAGE = 'https://www.api.rizsign.com/uploads/placeholder.jpg';
 
 const SkillTag = ({ skill }: { skill: string }) => (
   <Box
@@ -90,7 +89,6 @@ const AboutSection: React.FC = () => {
     setOpen(false);
   };
 
-  // Update profile image handling in useEffect
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
@@ -244,9 +242,8 @@ const AboutSection: React.FC = () => {
                         borderRadius: '50%',
                       }}
                     >
-                      {/* Update image rendering with error handling */}
                       <img
-                        src={aboutData.profile_image || FALLBACK_IMAGE}
+                        src={aboutData.profile_image}
                         alt={aboutData.name}
                         onError={(e) => {
                           const img = e.target as HTMLImageElement;
