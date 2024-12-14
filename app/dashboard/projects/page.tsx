@@ -186,88 +186,53 @@ const ProjectsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate all projects
-    const invalidProjects = projects.filter(p => !p.title || !p.description);
-    if (invalidProjects.length > 0) {
-      setSnackbar({
-        open: true,
-        message: 'All projects must have a title and description',
-        severity: 'error'
-      });
-      return;
-    }
-
     try {
-      const updatedProjects = await Promise.all(
-        projects.map(async (project) => {
-          if (project.imageFile) {
-            const formData = new FormData();
-            formData.append('image', project.imageFile);
-            
-            const uploadResponse = await fetch(`${API_URL}/upload.php`, {
-              method: 'POST',
-              credentials: 'include',
-              body: formData
-            });
+        // Filter out any projects without required fields
+        const validProjects = projects.filter(p => p.title && p.description);
+        
+        const response = await fetch(`${API_URL}/projects/index.php`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(validProjects.map(p => ({
+                title: p.title,
+                description: p.description,
+                image_url: p.image_url,
+                project_url: p.project_url || null,
+                github_url: p.github_url || null,
+                technologies: p.technologies || []
+            })))
+        });
 
-            if (!uploadResponse.ok) {
-              throw new Error('Failed to upload image');
-            }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
 
-            const uploadResult = await uploadResponse.json();
-            if (!uploadResult.success) {
-              throw new Error(uploadResult.message || 'Failed to upload image');
-            }
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to update projects');
+        }
 
-            return {
-              ...project,
-              image_url: uploadResult.url
-            };
-          }
-          return project;
-        })
-      );
+        setSnackbar({
+            open: true,
+            message: 'Projects updated successfully',
+            severity: 'success'
+        });
 
-      const response = await fetch(`${API_URL}/projects/index.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(updatedProjects.map(p => ({
-          id: p.id,
-          title: p.title,
-          description: p.description,
-          image_url: p.image_url,
-          project_url: p.project_url || null,
-          github_url: p.github_url || null,
-          technologies: p.technologies
-        })))
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to update projects');
-      }
-
-      setSnackbar({
-        open: true,
-        message: 'Projects updated successfully',
-        severity: 'success'
-      });
-
-      fetchProjects();
+        fetchProjects();
     } catch (error) {
-      console.error('Error:', error);
-      setSnackbar({
-        open: true,
-        message: error instanceof Error ? error.message : 'Failed to update projects',
-        severity: 'error'
-      });
+        console.error('Error:', error);
+        setSnackbar({
+            open: true,
+            message: error instanceof Error ? error.message : 'Failed to update projects',
+            severity: 'error'
+        });
     }
-  };
+};
 
   const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
