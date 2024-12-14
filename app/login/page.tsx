@@ -58,19 +58,17 @@ const LoginPage = () => {
         })
       });
 
-      const textResponse = await response.text();
       let data: LoginResponse | ErrorResponse;
       
       try {
+        const textResponse = await response.text();
         data = JSON.parse(textResponse);
-      } catch (parseError) {
-        console.error('Failed to parse response:', textResponse);
+      } catch {
         throw new Error('Server response error');
       }
 
       if (!response.ok || !data.success) {
-        const errorData = data as ErrorResponse;
-        throw new Error(errorData.message || 'Login failed');
+        throw new Error(data.message || 'Login failed');
       }
 
       const loginData = data as LoginResponse;
@@ -82,7 +80,6 @@ const LoginPage = () => {
       }
 
     } catch (error) {
-      console.error('Login error:', error);
       setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsLoading(false);
