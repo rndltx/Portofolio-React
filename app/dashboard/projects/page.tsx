@@ -55,13 +55,6 @@ interface ApiResult<T> {
   error?: string;
 }
 
-// Add image upload interface
-interface UploadResponse {
-  success: boolean;
-  url?: string;
-  message?: string;
-}
-
 const API_URL = 'https://www.api.rizsign.com/api';
 
 const newProjectDefault: Project = {
@@ -190,56 +183,25 @@ const ProjectsPage = () => {
     }, 500);
   };
 
-  // Update handleSubmit with image upload
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
         const validProjects = projects.filter(p => {
-            if (!p.title || !p.description) {
-                throw new Error('Title and description are required');
+            // Match database NOT NULL constraints
+            if (!p.title || !p.description || !p.image_url) {
+                throw new Error('Title, description and image are required');
             }
             return true;
         });
-
-        // Handle image uploads first
-        const uploadPromises = validProjects.map(async (project) => {
-            if (project.imageFile) {
-                const formData = new FormData();
-                formData.append('image', project.imageFile);
-
-                const uploadResponse = await fetch(`${API_URL}/projects/upload.php`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: formData
-                });
-
-                if (!uploadResponse.ok) {
-                    throw new Error('Failed to upload image');
-                }
-
-                const result: UploadResponse = await uploadResponse.json();
-                if (!result.success || !result.url) {
-                    throw new Error(result.message || 'Failed to upload image');
-                }
-
-                return {
-                    ...project,
-                    image_url: result.url
-                };
-            }
-            return project;
-        });
-
-        const projectsWithImages = await Promise.all(uploadPromises);
         
-        const projectsToSave = projectsWithImages.map(p => ({
-            title: p.title.slice(0, 255),
+        const projectsToSave = validProjects.map(p => ({
+            title: p.title.slice(0, 255), // Match varchar(255)
             description: p.description,
             image_url: p.image_url,
             project_url: p.project_url?.slice(0, 255) || null,
             github_url: p.github_url?.slice(0, 255) || null,
-            technologies: p.technologies || []
+            technologies: p.technologies || [] // Will be JSON encoded
         }));
 
         const response = await fetch(`${API_URL}/projects/index.php`, {
