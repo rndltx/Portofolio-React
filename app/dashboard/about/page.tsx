@@ -112,7 +112,7 @@ const AboutPage = () => {
     fetchAboutData();
   }, []);
 
-  // Update fetch calls with credentials
+  // Update fetchAboutData function
   const fetchAboutData = async () => {
     try {
       const response = await fetch(`${API_URL}/about/index.php`, {
@@ -135,6 +135,9 @@ const AboutPage = () => {
       // Transform data to match component state
       const transformedData: AboutData = {
         ...result.data.about,
+        // Fix profile image URL construction
+        profile_image: result.data.about.profile_image 
+          ? `https://www.api.rizsign.com/uploads/${encodeURIComponent(result.data.about.profile_image)}`: '',
         skills: Array.isArray(result.data.about.skills) 
           ? result.data.about.skills 
           : JSON.parse(result.data.about.skills || '[]'),
@@ -246,7 +249,7 @@ const AboutPage = () => {
     e.preventDefault();
     
     try {
-      // Handle profile image upload first if changed
+      // Update handleSubmit function profile image section
       if (aboutData.profile_image && aboutData.profile_image.startsWith('data:')) {
         const formData = new FormData();
         const file = dataURLtoFile(aboutData.profile_image, 'profile.jpg');
