@@ -74,6 +74,72 @@ const SkillTag = ({ skill }: { skill: string }) => (
   </Box>
 );
 
+const ProfileContainer = ({ aboutData }: { aboutData: AboutData }) => (
+  <Box 
+    sx={{
+      position: 'relative',
+      width: 280,
+      height: 280,
+      mx: 'auto',
+      mb: 6,
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        inset: '-12px',
+        border: '3px solid',
+        borderColor: 'primary.main',
+        borderRadius: '50%',
+        animation: 'spin 20s linear infinite',
+        background: 'linear-gradient(45deg, rgba(25, 118, 210, 0.1), rgba(66, 165, 245, 0.1))',
+      },
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        inset: '-20px',
+        border: '3px dashed',
+        borderColor: 'primary.light',
+        borderRadius: '50%',
+        animation: 'spin 30s linear infinite reverse',
+      }
+    }}
+  >
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      transition={{ 
+        duration: 0.3,
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+      }}
+    >
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: '50%',
+          background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+          padding: '4px', // Creates border effect
+        }}
+      >
+        <img
+          src={aboutData.profile_image || FALLBACK_IMAGE}
+          alt={aboutData.name}
+          style={{ 
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            borderRadius: '50%',
+            border: '4px solid white',
+            boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
+          }}
+        />
+      </Box>
+    </motion.div>
+  </Box>
+);
+
 const AboutSection: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [aboutData, setAboutData] = useState<AboutData>({
@@ -199,71 +265,19 @@ const AboutSection: React.FC = () => {
                   p: 8,
                   textAlign: 'center',
                   borderRadius: '24px',
-                  background: 'rgba(255, 255, 255, 0.9)',  // Changed to white with slight transparency
+                  background: 'rgba(255, 255, 255, 0.95)',
                   backdropFilter: 'blur(10px)',
-                  boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',  // Lighter shadow
-                  transition: 'all 0.3s ease-in-out',
+                  boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   '&:hover': {
                     transform: 'translateY(-8px)',
-                    boxShadow: '0 12px 40px rgba(31, 38, 135, 0.15)',  // Lighter hover shadow
+                    boxShadow: '0 12px 40px rgba(31, 38, 135, 0.15)',
+                    borderColor: 'primary.light',
                   }
                 }}
               >
-                <Box 
-                  sx={{
-                    position: 'relative',
-                    width: 280,
-                    height: 280,
-                    mx: 'auto',
-                    mb: 6,
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      inset: '-12px',
-                      border: '3px solid',
-                      borderColor: 'primary.main',
-                      borderRadius: '50%',
-                      animation: 'spin 20s linear infinite',
-                    },
-                    '&::after': {
-                      content: '""',
-                      position: 'absolute',
-                      inset: '-20px',
-                      border: '3px dashed',
-                      borderColor: 'primary.light',
-                      borderRadius: '50%',
-                      animation: 'spin 30s linear infinite reverse',
-                    }
-                  }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        borderRadius: '50%',
-                      }}
-                    >
-                      <img
-                        src={aboutData.profile_image || FALLBACK_IMAGE}
-                        alt={aboutData.name}
-                        style={{ 
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          border: '4px solid white',
-                          boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
-                          borderRadius: '50%'
-                        }}
-                      />
-                    </Box>
-                  </motion.div>
-                </Box>
+                <ProfileContainer aboutData={aboutData} />
 
                 <Typography 
                   variant="h3" 
@@ -302,11 +316,15 @@ const AboutSection: React.FC = () => {
                     textTransform: 'none',
                     fontWeight: 600,
                     background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                    backgroundSize: '200% 200%',
+                    animation: 'gradient 5s ease infinite',
                     boxShadow: '0 4px 14px 0 rgba(25, 118, 210, 0.39)',
                     '&:hover': {
                       transform: 'translateY(-2px)',
                       boxShadow: '0 6px 20px rgba(25, 118, 210, 0.39)',
-                    }
+                      background: 'linear-gradient(45deg, #1565c0, #1976d2)',
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
                   Learn More About Me
@@ -464,9 +482,20 @@ const AboutSection: React.FC = () => {
 
       <style jsx global>{`
         @keyframes pulse {
-          0% { opacity: 1; }
-          50% { opacity: 0.7; }
-          100% { opacity: 1; }
+          0% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
       `}</style>
     </Box>
