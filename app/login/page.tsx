@@ -41,7 +41,7 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/login/index.php`, {
         method: 'POST',
         credentials: 'include',
         headers: {
