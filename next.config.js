@@ -2,29 +2,28 @@
 const nextConfig = {
   output: 'export',
   images: {
-    unoptimized: true,
-    domains: ['www.api.rizsign.com'],
+    unoptimized: true,  // Mematikan optimasi gambar
+    domains: ['www.api.rizsign.com'],  // Memungkinkan gambar dari domain ini
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'www.api.rizsign.com'
-      }
-    ]
+        hostname: 'www.api.rizsign.com',  // Pola URL untuk gambar
+      },
+    ],
   },
   async headers() {
     return [
       {
-        source: '/api/:path*',
+        source: '/api/:path*',  // Menentukan pola path untuk API
         headers: [
-          { key: 'Access-Control-Allow-Origin', value: 'https://www.api.rizsign.com' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type,Authorization' },
-          { key: 'Access-Control-Allow-Credentials', value: 'true' }
-        ]
-      }
-    ]
-  }
-}
+          { key: 'Access-Control-Allow-Origin', value: 'https://www.rizsign.com' },  // Menentukan asal yang diizinkan
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },  // Metode yang diizinkan
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type,Authorization' },  // Header yang diizinkan
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },  // Mengizinkan kredensial
+        ],
+      },
+    ];
+  },
+};
 
-module.exports = nextConfig
-
+module.exports = nextConfig;
