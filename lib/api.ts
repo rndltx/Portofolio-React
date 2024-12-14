@@ -60,13 +60,9 @@ export const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
       throw new Error(errorData?.error || `API error: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('Invalid response format from server');
+    throw error;
   }
 };
 

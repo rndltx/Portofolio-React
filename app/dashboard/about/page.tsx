@@ -78,6 +78,7 @@ const AboutPage = () => {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           'Origin': 'https://www.rizsign.com'
         }
       });
