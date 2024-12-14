@@ -11,7 +11,7 @@ import {
   CardContent, 
   Snackbar,
   Alert,
-  LinearProgress 
+  LinearProgress // Add this import
 } from '@mui/material';
 import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -104,7 +104,7 @@ const AboutPage = () => {
     title: '',
     description: '',
     skills: [],
-    heroSlides: [], 
+    heroSlides: [], // Ensure initialized as empty array
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
@@ -136,27 +136,14 @@ const AboutPage = () => {
       const transformedData: AboutData = {
         ...result.data.about,
         // Fix profile image URL construction
-        profile_image: result.data.about.profile_image
-          ? (result.data.about.profile_image.startsWith('http')
-            ? result.data.about.profile_image
-            : `${API_URL}/uploads/${result.data.about.profile_image}`)
-          : '/placeholder.jpg',
+        profile_image: result.data.about.profile_image || '/placeholder.jpg',
         skills: Array.isArray(result.data.about.skills) 
           ? result.data.about.skills 
           : JSON.parse(result.data.about.skills || '[]'),
         heroSlides: result.data.heroSlides.map((slide: HeroSlide) => ({
           ...slide,
-          image_url: slide.image_url
-            ? (slide.image_url.startsWith('http')
-              ? slide.image_url
-              : `${API_URL}/uploads/${slide.image_url}`)
-            : '/placeholder.jpg',
           uploadProgress: 0,
           imagePreview: slide.image_url
-            ? (slide.image_url.startsWith('http')
-              ? slide.image_url
-              : `${API_URL}/uploads/${slide.image_url}`)
-            : '/placeholder.jpg'
         }))
       };
 
@@ -261,8 +248,7 @@ const AboutPage = () => {
     e.preventDefault();
     
     try {
-      // Handle profile image upload if it's a data URL
-      let profileImageUrl = aboutData.profile_image;
+      // Update handleSubmit function profile image section
       if (aboutData.profile_image && aboutData.profile_image.startsWith('data:')) {
         const formData = new FormData();
         const file = dataURLtoFile(aboutData.profile_image, 'profile.jpg');
@@ -280,13 +266,10 @@ const AboutPage = () => {
         }
 
         const uploadResult = await uploadResp.json();
-        profileImageUrl = uploadResult.url;
-      } else if (profileImageUrl && profileImageUrl.startsWith(API_URL)) {
-        // If it's a full URL, extract just the filename
-        profileImageUrl = profileImageUrl.split('/').pop() || '';
+        aboutData.profile_image = uploadResult.url;
       }
 
-      // Handle image uploads for hero slides
+      // Handle image uploads first
       const uploadPromises = aboutData.heroSlides
         .filter(slide => slide.imageFile)
         .map(async (slide) => {
@@ -323,13 +306,14 @@ const AboutPage = () => {
             title: aboutData.title,
             description: aboutData.description,
             skills: aboutData.skills,
-            profile_image: profileImageUrl
+            profile_image: aboutData.profile_image
           },
+          // Use updatedSlides for slides that had new images, fall back to existing slides for others
           heroSlides: aboutData.heroSlides.map(slide => {
             const updatedSlide = updatedSlides.find(us => us.id === slide.id);
             return {
               id: slide.id,
-              image_url: updatedSlide ? updatedSlide.image_url : (slide.image_url.split('/').pop() || ''),
+              image_url: updatedSlide ? updatedSlide.image_url : slide.image_url,
               title: slide.title,
               subtitle: slide.subtitle
             };
@@ -504,7 +488,7 @@ const AboutPage = () => {
                   label="Skills (comma-separated)"
                   fullWidth
                   name="skills"
-                  value={aboutData.skills?.join(', ') || ''} 
+                  value={aboutData.skills?.join(', ') || ''} // Add null check and fallback
                   onChange={handleSkillsChange}
                   sx={{
                     '& .MuiOutlinedInput-root': {
