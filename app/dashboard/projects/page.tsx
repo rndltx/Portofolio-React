@@ -338,8 +338,8 @@ const ProjectsPage = () => {
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                       <Chip
-                        label={option}
                         {...getTagProps({ index })}
+                        label={option}
                         size="small"
                       />
                     ))
@@ -441,7 +441,7 @@ const ProjectsPage = () => {
                   <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap', gap: 1 }}>
                     {project.technologies.map((tech, index) => (
                       <Chip
-                        key={`project-${project.id}-tech-${index}`}
+                        key={`${project.id}-${tech}-${index}`}
                         label={tech}
                         size="small"
                         variant="outlined"
