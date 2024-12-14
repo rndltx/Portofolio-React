@@ -13,7 +13,6 @@ import {
   Paper,
   Container,
   IconButton,
-  CircularProgress,
   Skeleton
 } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -28,11 +27,20 @@ interface AboutData {
   profile_image?: string;
 }
 
+interface HeroSlide {
+  id: number;
+  image_url: string;
+  title: string;
+  subtitle: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 interface ApiResponse {
   success: boolean;
   data?: {
     about: AboutData;
-    heroSlides: any[];
+    heroSlides: HeroSlide[];
   };
   error?: string;
 }

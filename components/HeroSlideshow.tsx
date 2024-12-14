@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Box, Typography, Button, IconButton, CircularProgress, Skeleton } from '@mui/material';
+import { Box, Typography, Button, IconButton, Skeleton } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,10 +16,18 @@ interface Slide {
   subtitle: string;
 }
 
+interface AboutData {
+  id?: number;
+  name: string;
+  title: string;
+  description: string;
+  skills: string[];
+}
+
 interface ApiResponse {
   success: boolean;
   data?: {
-    about: any;
+    about: AboutData;
     heroSlides: Array<{
       id: number;
       image_url: string;
