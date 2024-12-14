@@ -23,13 +23,15 @@ import { ExternalLink, Github } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Project {
-  id?: number;
+  id: number;
   title: string;
   description: string;
   image_url: string;
-  project_url: string;
-  github_url: string;
+  project_url: string | null;
+  github_url: string | null;
   technologies: string[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 const API_URL = 'https://www.api.rizsign.com/api';
@@ -239,10 +241,7 @@ const ProjectsSection: React.FC = () => {
                             href={project.project_url} 
                             target="_blank"
                             startIcon={<ExternalLink size={16} />}
-                            sx={{
-                              textTransform: 'none',
-                              fontWeight: 600
-                            }}
+                            sx={{ textTransform: 'none', fontWeight: 600 }}
                           >
                             Live Demo
                           </Button>
@@ -253,10 +252,7 @@ const ProjectsSection: React.FC = () => {
                             href={project.github_url} 
                             target="_blank"
                             startIcon={<Github size={16} />}
-                            sx={{
-                              textTransform: 'none',
-                              fontWeight: 600
-                            }}
+                            sx={{ textTransform: 'none', fontWeight: 600 }}
                           >
                             GitHub
                           </Button>

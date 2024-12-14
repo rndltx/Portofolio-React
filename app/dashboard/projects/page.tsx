@@ -22,12 +22,14 @@ interface Project {
   title: string;
   description: string;
   image_url: string;
-  project_url: string;
-  github_url: string;
+  project_url: string | null;
+  github_url: string | null;
   technologies: string[];
+  created_at?: string;
+  updated_at?: string;
   imageFile?: File | null;
   imagePreview?: string;
-  uploadProgress: number;
+  uploadProgress?: number;
 }
 
 interface ProjectApiData {
@@ -48,21 +50,23 @@ interface ApiResult<T> {
 
 const API_URL = 'https://www.api.rizsign.com/api';
 
+const newProjectDefault: Project = {
+  id: 0,
+  title: '',
+  description: '',
+  image_url: '/placeholder.jpg',
+  project_url: '',
+  github_url: '',
+  technologies: [],
+  imageFile: null,
+  imagePreview: '/placeholder.jpg',
+  uploadProgress: 0
+};
+
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [newProject, setNewProject] = useState<Project>({
-    id: 0,
-    title: '',
-    description: '',
-    image_url: '/placeholder.svg?height=200&width=300',
-    project_url: '',
-    github_url: '',
-    technologies: [],
-    imageFile: null,
-    imagePreview: '/placeholder.svg?height=200&width=300',
-    uploadProgress: 0
-  });
+  const [newProject, setNewProject] = useState<Project>(newProjectDefault);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
@@ -120,18 +124,7 @@ const ProjectsPage = () => {
       } else {
         setProjects([...projects, { ...newProject, id: Date.now() }]);
       }
-      setNewProject({ 
-        id: 0,
-        title: '', 
-        description: '', 
-        image_url: '/placeholder.svg?height=200&width=300',
-        project_url: '',
-        github_url: '',
-        technologies: [],
-        imageFile: null, 
-        imagePreview: '/placeholder.svg?height=200&width=300',
-        uploadProgress: 0
-      });
+      setNewProject(newProjectDefault);
     }
   };
 
@@ -182,46 +175,51 @@ const ProjectsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      for (const project of projects) {
-        if (project.imageFile) {
-          const formData = new FormData();
-          formData.append('image', project.imageFile);
-          formData.append('projectId', project.id.toString());
-          
-          const uploadResponse = await fetch(`${API_URL}/upload`, {
-            method: 'POST',
-            body: formData,
-            credentials: 'include'
-          });
+      // Handle image uploads
+      const updatedProjects = await Promise.all(
+        projects.map(async (project) => {
+          if (project.imageFile) {
+            const formData = new FormData();
+            formData.append('image', project.imageFile);
+            
+            const uploadResponse = await fetch(`${API_URL}/upload.php`, {
+              method: 'POST',
+              credentials: 'include',
+              body: formData
+            });
 
-          if (!uploadResponse.ok) {
-            throw new Error('Failed to upload image');
+            if (!uploadResponse.ok) {
+              throw new Error('Failed to upload image');
+            }
+
+            const uploadResult = await uploadResponse.json();
+            return {
+              ...project,
+              image_url: uploadResult.url
+            };
           }
-        }
-      }
+          return project;
+        })
+      );
 
+      // Submit updated projects
       const response = await fetch(`${API_URL}/projects/index.php`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(projects.map(project => ({
-          id: project.id,
-          title: project.title,
-          description: project.description,
-          image_url: project.image_url,
-          project_url: project.project_url,
-          github_url: project.github_url,
-          technologies: project.technologies
+        body: JSON.stringify(updatedProjects.map(p => ({
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          image_url: p.image_url,
+          project_url: p.project_url || null,
+          github_url: p.github_url || null,
+          technologies: p.technologies
         })))
       });
 
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to update projects');
-      }
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message);
 
       setSnackbar({
         open: true,
