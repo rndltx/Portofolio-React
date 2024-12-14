@@ -29,7 +29,7 @@ interface ApiResult<T> {
   data?: T;
 }
 
-const API_URL = 'https://www.rizsign.com/api';
+const API_URL = 'https://www.api.rizsign.com/api';
 
 const SettingsPage = () => {
   const [isLoading, setIsLoading] = useState(true);

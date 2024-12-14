@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { Plus, Trash2, School, Briefcase, Award, Star, Calendar, Flag } from 'lucide-react';
 
-const API_URL = 'https://www.rizsign.com/api';
+const API_URL = 'https://www.api.rizsign.com/api';
 
 interface TimelineEvent {
   id?: number;

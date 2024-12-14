@@ -17,7 +17,7 @@ import { Upload, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Update API URL constant
-const API_URL = 'https://www.rizsign.com/api';
+const API_URL = 'https://www.api.rizsign.com/api';
 
 // Add image preview component
 const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (

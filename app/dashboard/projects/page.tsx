@@ -46,7 +46,7 @@ interface ApiResult<T> {
   error?: string;
 }
 
-const API_URL = 'https://www.rizsign.com/api';
+const API_URL = 'https://www.api.rizsign.com/api';
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
