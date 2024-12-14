@@ -28,6 +28,11 @@ interface LoginResponse {
   };
 }
 
+interface ErrorResponse {
+  success: boolean;
+  message: string;
+}
+
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -55,13 +60,15 @@ const LoginPage = () => {
       
       try {
         data = JSON.parse(textResponse);
-      } catch (e) {
+      } catch (parseError) {
         console.error('Raw response:', textResponse);
+        console.error('Parse error:', parseError);
         throw new Error('Invalid JSON response from server');
       }
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Login failed');
+        const errorData = data as ErrorResponse;
+        throw new Error(errorData.message || 'Login failed');
       }
 
       if (data.success && data.session) {
