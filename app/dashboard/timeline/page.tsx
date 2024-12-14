@@ -60,7 +60,7 @@ const TimelinePage = () => {
 
   const fetchTimelineEvents = async () => {
     try {
-      const response = await fetch(`${API_URL}/timeline`, {
+      const response = await fetch(`${API_URL}/timeline/index.php`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'

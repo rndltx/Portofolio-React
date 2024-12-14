@@ -72,7 +72,7 @@ const ProjectsPage = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`${API_URL}/projects`, {
+      const response = await fetch(`${API_URL}/projects/index.php`, {
         method: 'GET',
         credentials: 'include',
         headers: {

@@ -57,7 +57,7 @@ const ProjectsSection: React.FC = () => {
     try {
       if (!API_URL) throw new Error('API URL not configured');
 
-      const response = await fetch(`${API_URL}/projects`, {
+      const response = await fetch(`${API_URL}/projects/index.php`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
