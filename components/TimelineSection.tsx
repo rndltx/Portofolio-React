@@ -18,8 +18,8 @@ import TimelineDot from '@mui/lab/TimelineDot';
 import { School, Briefcase, Code, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Add API URL and interfaces
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Update API URL for proper domain
+const API_URL = 'https://www.api.rizsign.com/api';
 
 interface ApiResponse {
   success: boolean;
