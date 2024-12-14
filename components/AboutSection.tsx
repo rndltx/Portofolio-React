@@ -23,9 +23,9 @@ interface AboutData {
   title: string;
   description: string;
   skills: string[];
+  profile_image?: string;
   created_at?: string;
   updated_at?: string;
-  profile_image?: string;
 }
 
 interface HeroSlide {
