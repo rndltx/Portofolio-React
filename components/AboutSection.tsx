@@ -45,7 +45,7 @@ interface ApiResponse {
 }
 
 const API_URL = 'https://www.api.rizsign.com/api';
-const FALLBACK_IMAGE = 'https://www.api.rizsign.com/uploads/placeholder.jpg';
+const FALLBACK_IMAGE = '/placeholder.jpg';
 
 const SkillTag = ({ skill }: { skill: string }) => (
   <Box
@@ -113,7 +113,6 @@ const AboutSection: React.FC = () => {
         
         setAboutData({
           ...about,
-          profile_image: about.profile_image || FALLBACK_IMAGE,
           skills: Array.isArray(about.skills) ? about.skills : JSON.parse(about.skills || '[]')
         });
       } catch (error) {
@@ -243,12 +242,8 @@ const AboutSection: React.FC = () => {
                       }}
                     >
                       <img
-                        src={aboutData.profile_image}
+                        src={aboutData.profile_image || FALLBACK_IMAGE}
                         alt={aboutData.name}
-                        onError={(e) => {
-                          const img = e.target as HTMLImageElement;
-                          img.src = FALLBACK_IMAGE;
-                        }}
                         style={{ 
                           width: '100%',
                           height: '100%',
