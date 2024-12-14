@@ -62,20 +62,23 @@ const LoginPage = () => {
       const textResponse = await response.text();
       
       try {
-        const data: LoginResponse = JSON.parse(textResponse);
+        const data: LoginResponse | ErrorResponse = JSON.parse(textResponse);
         
         if (!response.ok || !data.success) {
-          throw new Error(data.message || 'Login failed');
+          const errorData = data as ErrorResponse;
+          throw new Error(errorData.message || 'Login failed');
         }
 
-        if (data.session) {
-          sessionStorage.setItem('user', JSON.stringify(data.session));
+        const loginData = data as LoginResponse;
+        if (loginData.session) {
+          sessionStorage.setItem('user', JSON.stringify(loginData.session));
           router.push('/dashboard');
         } else {
           throw new Error('Invalid session data');
         }
       } catch (parseError) {
-        console.error('Raw response:', textResponse);
+        console.error('Parse error details:', parseError);
+        console.error('Raw server response:', textResponse);
         throw new Error('Server response error');
       }
     } catch (error) {
