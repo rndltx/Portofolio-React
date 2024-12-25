@@ -115,7 +115,7 @@ const Header = () => {
                 letterSpacing: '-0.5px'
               }}
             >
-              Khairun
+              RIZSIGN.
             </Typography>
           </Box>
 
