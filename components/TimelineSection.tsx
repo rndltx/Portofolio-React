@@ -101,7 +101,17 @@ const TimelineSection: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         py: 16,
-        background: '#ffffff', // Changed to solid white
+        background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          width: '200%',
+          height: '200%',
+          background: 'radial-gradient(circle, rgba(25, 118, 210, 0.03) 0%, transparent 50%)',
+          animation: 'gradientMove 15s ease infinite',
+        }
       }}
     >
       <Container maxWidth="lg">
@@ -111,12 +121,13 @@ const TimelineSection: React.FC = () => {
               variant="h2" 
               align="center" 
               sx={{
-                mb: 8,
-                fontWeight: 'bold',
+                mb: 10,
+                fontWeight: 800,
                 background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
+                letterSpacing: '-0.5px',
                 position: 'relative',
                 '&::after': {
                   content: '""',
@@ -141,13 +152,28 @@ const TimelineSection: React.FC = () => {
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ duration: 0.5, delay: index * 0.2 }}
+                      transition={{ 
+                        duration: 0.5, 
+                        delay: index * 0.2,
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20 
+                      }}
                     >
                       <TimelineDot 
                         sx={{
-                          bgcolor: 'primary.main',
-                          boxShadow: '0 0 20px rgba(25, 118, 210, 0.3)',
-                          p: 2
+                          bgcolor: 'white',
+                          border: '2px solid',
+                          borderColor: 'primary.main',
+                          boxShadow: '0 0 20px rgba(25, 118, 210, 0.2)',
+                          p: 2,
+                          color: 'primary.main',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                            transform: 'scale(1.1)',
+                          }
                         }}
                       >
                         {getIcon(item.icon)}
@@ -156,27 +182,37 @@ const TimelineSection: React.FC = () => {
                     {index !== timelineItems.length - 1 && (
                       <TimelineConnector 
                         sx={{
-                          bgcolor: 'primary.main',
-                          width: '2px'
+                          background: 'linear-gradient(180deg, #1976d2 0%, #42a5f5 100%)',
+                          width: '2px',
+                          opacity: 0.3
                         }}
                       />
                     )}
                   </TimelineSeparator>
-                  <TimelineContent>
+                  <TimelineContent sx={{ py: 3 }}>
                     <motion.div
                       initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.2 }}
+                      transition={{ 
+                        duration: 0.5, 
+                        delay: index * 0.2,
+                        type: "spring",
+                        stiffness: 100 
+                      }}
                     >
                       <Paper 
-                        elevation={3} 
+                        elevation={0} 
                         sx={{
                           p: 3,
                           borderRadius: '16px',
-                          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                          border: '1px solid rgba(25, 118, 210, 0.1)',
+                          background: 'rgba(255, 255, 255, 0.8)',
+                          backdropFilter: 'blur(10px)',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                           '&:hover': {
                             transform: 'translateY(-5px)',
-                            boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
+                            boxShadow: '0 10px 30px rgba(25, 118, 210, 0.1)',
+                            border: '1px solid rgba(25, 118, 210, 0.2)',
                           }
                         }}
                       >
@@ -184,9 +220,10 @@ const TimelineSection: React.FC = () => {
                           variant="h6" 
                           component="h1"
                           sx={{
-                            fontWeight: 'bold',
+                            fontWeight: 700,
                             color: 'primary.main',
-                            mb: 1
+                            mb: 1,
+                            letterSpacing: '-0.5px'
                           }}
                         >
                           {item.title}
@@ -197,7 +234,8 @@ const TimelineSection: React.FC = () => {
                             display: 'block',
                             mb: 2,
                             color: 'text.secondary',
-                            fontSize: '1rem'
+                            fontSize: '0.95rem',
+                            fontWeight: 500
                           }}
                         >
                           {new Date(item.date).getFullYear()}
@@ -205,7 +243,8 @@ const TimelineSection: React.FC = () => {
                         <Typography 
                           sx={{
                             color: 'text.secondary',
-                            lineHeight: 1.7
+                            lineHeight: 1.8,
+                            fontSize: '0.95rem'
                           }}
                         >
                           {item.description}
@@ -219,6 +258,12 @@ const TimelineSection: React.FC = () => {
           </Box>
         </Fade>
       </Container>
+      <style jsx global>{`
+        @keyframes gradientMove {
+          0% { transform: translate(-50%, -50%) rotate(0deg); }
+          100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+      `}</style>
     </Box>
   );
 };
