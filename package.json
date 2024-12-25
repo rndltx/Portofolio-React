@@ -27,7 +27,7 @@
     "cors": "^2.8.5",
     "css": "^3.0.0",
     "dotenv": "^16.4.7",
-    "framer-motion": "^11.14.4",
+    "framer-motion": "^11.15.0",
     "http-proxy-middleware": "^3.0.3",
     "lucide-react": "^0.468.0",
     "mysql2": "^3.11.5",
