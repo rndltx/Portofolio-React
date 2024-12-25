@@ -177,9 +177,35 @@ const Footer = () => {
               <Typography variant="body1" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Email fontSize="small" /> xnuxerx@gmail.com
               </Typography>
-              <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                📍 Jl. Sagitarius III No 15H, Banjarbaru, Kalimantan Selatan
-              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" sx={{ mb: 2, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  📍 Jl. Sagitarius III No 15H, Banjarbaru, Kalimantan Selatan
+                </Typography>
+                
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '200px',
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    border: '2px solid rgba(255,255,255,0.1)',
+                    transition: 'transform 0.3s ease',
+                    '&:hover': {
+                      transform: 'scale(1.02)',
+                    }
+                  }}
+                >
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.1307456753447!2d114.8288888!3d-3.4569444!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2de681be0f0f0001%3A0x1234567890abcdef!2sJl.%20Sagitarius%20III%20No%2015H%2C%20Banjarbaru%2C%20Kalimantan%20Selatan!5e0!3m2!1sen!2sid!4v1234567890123"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </Box>
+              </Box>
             </Box>
           </Grid>
         </Grid>
