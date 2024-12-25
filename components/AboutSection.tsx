@@ -496,17 +496,21 @@ const AboutSection: React.FC = () => {
           </DialogTitle>
 
           <DialogContent>
-            <Typography 
-              paragraph
-              sx={{
-                fontSize: '1.1rem',
-                lineHeight: 1.8,
-                color: 'text.secondary',
-                textAlign: 'justify'
-              }}
-            >
-              {aboutData.description}
-            </Typography>
+            {aboutData.description.split('\n').map((paragraph, index) => (
+              <Typography 
+                key={index}
+                paragraph
+                sx={{
+                  fontSize: '1.1rem',
+                  lineHeight: 1.8,
+                  color: 'text.secondary',
+                  textAlign: 'justify',
+                  mb: 2 // Add margin bottom between paragraphs
+                }}
+              >
+                {paragraph}
+              </Typography>
+            ))}
           </DialogContent>
         </Dialog>
       </Container>
