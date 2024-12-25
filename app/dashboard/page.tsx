@@ -15,7 +15,7 @@ const DashboardHome = () => {
     // Check auth status
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/check', {
+        const response = await fetch('/api/auth/check/index.php', {
           credentials: 'include'
         });
         
