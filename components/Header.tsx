@@ -69,8 +69,9 @@ const Header = () => {
       elevation={scrolled ? 4 : 0}
       sx={{
         transition: 'all 0.3s ease-in-out',
-        bgcolor: scrolled ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(10px)' : 'none',
+        bgcolor: scrolled ? 'rgba(255, 255, 255, 0.8)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(20px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
       }}
     >
       <LinearProgress 
@@ -81,10 +82,11 @@ const Header = () => {
           top: 0,
           left: 0,
           right: 0,
-          height: '2px',
+          height: '3px',
           bgcolor: 'transparent',
           '& .MuiLinearProgress-bar': {
             bgcolor: 'primary.main',
+            backgroundImage: 'linear-gradient(45deg, #1976d2, #42a5f5)',
           }
         }}
       />
@@ -101,18 +103,29 @@ const Header = () => {
             display: 'flex', 
             alignItems: 'center', 
             gap: 1,
-            flexGrow: { xs: 1, md: 0 }
+            flexGrow: { xs: 1, md: 0 },
+            '&:hover': {
+              '& svg': {
+                transform: 'rotate(360deg)',
+              },
+              '& .logo-text': {
+                backgroundPosition: 'right center',
+              }
+            }
           }}>
-            <Code size={32} color={theme.palette.primary.main} />
+            <Code size={32} color={theme.palette.primary.main} style={{ transition: 'transform 0.6s ease' }} />
             <Typography 
               variant="h5" 
+              className="logo-text"
               sx={{ 
                 fontWeight: 800,
-                background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                background: 'linear-gradient(to right, #1976d2, #42a5f5, #1976d2)',
+                backgroundSize: '200% auto',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                letterSpacing: '-0.5px'
+                letterSpacing: '-0.5px',
+                transition: 'background-position 0.6s ease',
               }}
             >
               RIZSIGN.
@@ -123,7 +136,7 @@ const Header = () => {
           <Box sx={{ 
             display: { xs: 'none', md: 'flex' },
             alignItems: 'center',
-            gap: 1,
+            gap: 2,
             mx: 'auto'
           }}>
             {navItems.map(({ id, label }) => (
@@ -138,15 +151,23 @@ const Header = () => {
                   color: activeSection === id ? 'primary.main' : 'text.primary',
                   position: 'relative',
                   fontWeight: activeSection === id ? 700 : 500,
-                  '&::after': {
+                  overflow: 'hidden',
+                  '&::before': {
                     content: '""',
                     position: 'absolute',
                     bottom: 0,
                     left: 0,
-                    width: activeSection === id ? '100%' : '0%',
+                    width: '100%',
                     height: '2px',
                     bgcolor: 'primary.main',
-                    transition: 'width 0.3s ease-in-out'
+                    transition: 'transform 0.3s ease-in-out',
+                    transform: activeSection === id ? 'scaleX(1)' : 'scaleX(0)',
+                    transformOrigin: 'left'
+                  },
+                  '&:hover': {
+                    '&::before': {
+                      transform: 'scaleX(1)',
+                    }
                   }
                 }}
               >
@@ -160,9 +181,13 @@ const Header = () => {
             <IconButton 
               onClick={() => setIsDark(!isDark)}
               sx={{ 
-                bgcolor: 'action.hover',
-                '&:hover': { transform: 'rotate(180deg)' },
-                transition: 'transform 0.3s ease'
+                bgcolor: 'rgba(25, 118, 210, 0.1)',
+                backdropFilter: 'blur(4px)',
+                '&:hover': { 
+                  transform: 'rotate(180deg)',
+                  bgcolor: 'rgba(25, 118, 210, 0.2)',
+                },
+                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -176,13 +201,17 @@ const Header = () => {
                 display: { xs: 'none', md: 'flex' },
                 px: 3,
                 py: 1,
-                borderRadius: '8px',
+                borderRadius: '50px',
                 textTransform: 'none',
                 fontWeight: 600,
-                boxShadow: '0 4px 14px 0 rgba(25, 118, 210, 0.39)',
+                background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                backgroundSize: '200% auto',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(25, 118, 210, 0.3)',
                 '&:hover': {
+                  backgroundPosition: 'right center',
                   transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 20px 0 rgba(25, 118, 210, 0.39)',
+                  boxShadow: '0 6px 20px rgba(25, 118, 210, 0.4)',
                 }
               }}
             >
