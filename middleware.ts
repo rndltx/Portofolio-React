@@ -1,36 +1,41 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get('authToken')
+const API_URL = 'https://www.api.rizsign.com/api'
 
-  // Protect all dashboard routes
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-  }
-
+export async function middleware(request: NextRequest) {
+  // Handle preflight requests
   if (request.method === 'OPTIONS') {
     return new NextResponse(null, {
       status: 200,
       headers: {
-        'Access-Control-Allow-Origin': 'https://www.rizsign.com',
+        'Access-Control-Allow-Origin': API_URL,
         'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Max-Age': '86400'
       }
     })
   }
 
-  const response = NextResponse.next()
-  response.headers.set('Access-Control-Allow-Origin', 'https://www.rizsign.com')
-  response.headers.set('Access-Control-Allow-Credentials', 'true')
-  
-  return response
+  // Protect dashboard routes
+  if (request.nextUrl.pathname.startsWith('/dashboard')) {
+    try {
+      const authCheck = await fetch(`${API_URL}/auth/check`, {
+        credentials: 'include',
+      })
+
+      if (!authCheck.ok) {
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+    } catch {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: '/dashboard/:path*'
+  matcher: ['/dashboard/:path*']
 }
