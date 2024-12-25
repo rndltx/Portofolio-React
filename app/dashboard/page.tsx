@@ -6,6 +6,8 @@ import { Typography, Grid, Box, Card, CardContent, CardHeader, CircularProgress,
 import { User, Clock, Briefcase, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const API_URL = 'https://www.api.rizsign.com/api'
+
 const DashboardHome = () => {
   const router = useRouter();
   const theme = useTheme();
@@ -15,7 +17,7 @@ const DashboardHome = () => {
     // Check auth status
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/check/index.php', {
+        const response = await fetch(`${API_URL}/auth/check/index.php`, {
           credentials: 'include'
         });
         
