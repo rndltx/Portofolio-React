@@ -257,6 +257,9 @@ const AboutSection: React.FC = () => {
     );
   }
 
+  // Get first paragraph only
+  const firstParagraph = aboutData.description.split('\n')[0];
+
   return (
     <Box 
       component="section" 
@@ -404,7 +407,7 @@ const AboutSection: React.FC = () => {
                     textAlign: 'justify'
                   }}
                 >
-                  {aboutData.description}
+                  {firstParagraph}
                 </Typography>
               </motion.div>
 
