@@ -1,26 +1,13 @@
 import React from 'react';
-import { Container, Typography, Link, Grid, Box, IconButton, Paper } from '@mui/material';
-import { GitHub, LinkedIn, Instagram, Email, LocationOn } from '@mui/icons-material';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { Container, Typography, Link, Grid, Box, IconButton } from '@mui/material';
+import { GitHub, LinkedIn, Instagram, Email } from '@mui/icons-material';
 
 const Footer = () => {
-  const coordinates = {
-    lat: -3.4427, // Replace with your actual coordinates
-    lng: 114.8432 // Replace with your actual coordinates
-  };
-
-  const mapContainerStyle = {
-    width: '100%',
-    height: '200px',
-    borderRadius: '8px',
-    marginTop: '16px'
-  };
-
   const socialLinks = [
-    { icon: <GitHub />, url: "https://github.com/rndltx", label: "GitHub" },
-    { icon: <LinkedIn />, url: "https://linkedin.com/khairun-rizaldy", label: "LinkedIn" },
-    { icon: <Instagram />, url: "https://instagram.com/rizsign", label: "Instagram" },
-    { icon: <Email />, url: "mailto:xnuxerx@gmail.com", label: "Email" },
+    { icon: <GitHub />, url: "https://github.com/rndltx" },
+    { icon: <LinkedIn />, url: "https://linkedin.com/khairun-rizaldy" },
+    { icon: <Instagram />, url: "https://instagram.com/rizsign" },
+    { icon: <Email />, url: "mailto:xnuxerx@gmail.com" },
   ];
 
   const quickLinks = [
@@ -39,28 +26,17 @@ const Footer = () => {
         py: 8,
         mt: 8,
         boxShadow: '0 -10px 40px rgba(0,0,0,0.1)',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: 'linear-gradient(90deg, #00ff87, #60efff)',
-        }
       }}
     >
       <Container maxWidth="lg">
         <Grid container spacing={6}>
-          {/* Left Column */}
           <Grid item xs={12} md={4}>
             <Typography 
               variant="h5" 
               gutterBottom 
               sx={{ 
                 fontWeight: '700',
-                background: 'linear-gradient(90deg, #00ff87, #60efff)',
+                background: 'linear-gradient(90deg, #fff, #e0e0e0)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
@@ -69,7 +45,7 @@ const Footer = () => {
             >
               Khairun Rizaldy
             </Typography>
-            <Typography variant="body1" sx={{ mb: 3, opacity: 0.9, lineHeight: 1.8 }}>
+            <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
               Membuat Website Menjadi Lebih Indah dan Menarik Dengan Experience Luar Biasa
             </Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -79,16 +55,14 @@ const Footer = () => {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={social.label}
                   sx={{
                     color: 'white',
                     backgroundColor: 'rgba(255,255,255,0.1)',
                     backdropFilter: 'blur(10px)',
-                    transition: 'all 0.3s ease',
                     '&:hover': {
                       backgroundColor: 'rgba(255,255,255,0.2)',
-                      transform: 'translateY(-5px) scale(1.1)',
-                      boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+                      transform: 'translateY(-5px)',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     },
                   }}
                 >
@@ -98,7 +72,6 @@ const Footer = () => {
             </Box>
           </Grid>
 
-          {/* Middle Column */}
           <Grid item xs={12} md={4}>
             <Typography 
               variant="h6" 
@@ -121,11 +94,10 @@ const Footer = () => {
                     display: 'flex',
                     alignItems: 'center',
                     opacity: 0.9,
-                    transition: 'all 0.3s ease',
                     '&:hover': {
                       opacity: 1,
                       transform: 'translateX(10px)',
-                      color: '#00ff87',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     },
                     '&::before': {
                       content: '"→"',
@@ -144,7 +116,6 @@ const Footer = () => {
             </Box>
           </Grid>
 
-          {/* Right Column */}
           <Grid item xs={12} md={4}>
             <Typography 
               variant="h6" 
@@ -156,43 +127,22 @@ const Footer = () => {
             >
               Contact
             </Typography>
-            <Paper elevation={0} sx={{ 
+            <Box sx={{ 
               backgroundColor: 'rgba(255,255,255,0.1)',
               borderRadius: 2,
               p: 3,
               backdropFilter: 'blur(10px)'
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Email sx={{ mr: 2, color: '#00ff87' }} />
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  xnuxerx@gmail.com
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'start', mb: 2 }}>
-                <LocationOn sx={{ mr: 2, color: '#00ff87' }} />
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Jl. Sagitarius III No 15H, Banjarbaru, Kalimantan Selatan
-                </Typography>
-              </Box>
-              
-              <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={coordinates}
-                  zoom={15}
-                  options={{
-                    styles: [{ elementType: "geometry", stylers: [{ color: "#242f3e" }] }],
-                    scrollwheel: false
-                  }}
-                >
-                  <Marker position={coordinates} />
-                </GoogleMap>
-              </LoadScript>
-            </Paper>
+              <Typography variant="body2" paragraph sx={{ opacity: 0.9 }}>
+                Email: xnuxerx@gmail.com
+              </Typography>
+              <Typography variant="body2" paragraph sx={{ opacity: 0.9 }}>
+                Location: Jl. Sagitarius III No 15H, Banjarbaru, Kalimantan Selatan
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
 
-        {/* Footer Bottom */}
         <Box
           sx={{
             borderTop: '1px solid rgba(255, 255, 255, 0.1)',
@@ -205,26 +155,36 @@ const Footer = () => {
             © {new Date().getFullYear()} Khairun Rizaldy. All rights reserved.
           </Typography>
           <Typography variant="body2" sx={{ mt: 2 }}>
-            {['Privacy Policy', 'Terms of Service'].map((text, index) => (
-              <Link 
-                key={index}
-                href="#" 
-                sx={{ 
-                  color: 'white',
-                  textDecoration: 'none',
-                  opacity: 0.8,
-                  transition: 'all 0.3s ease',
-                  '&:hover': { 
-                    opacity: 1,
-                    color: '#00ff87',
-                    textDecoration: 'underline'
-                  },
-                  mx: 2
-                }}
-              >
-                {text}
-              </Link>
-            ))}
+            <Link 
+              href="#" 
+              sx={{ 
+                color: 'white',
+                textDecoration: 'none',
+                opacity: 0.8,
+                '&:hover': { 
+                  opacity: 1,
+                  textDecoration: 'underline'
+                },
+                mx: 2
+              }}
+            >
+              Privacy Policy
+            </Link>
+            <Link 
+              href="#" 
+              sx={{ 
+                color: 'white',
+                textDecoration: 'none',
+                opacity: 0.8,
+                '&:hover': { 
+                  opacity: 1,
+                  textDecoration: 'underline'
+                },
+                mx: 2
+              }}
+            >
+              Terms of Service
+            </Link>
           </Typography>
         </Box>
       </Container>
