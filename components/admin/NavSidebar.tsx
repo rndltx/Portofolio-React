@@ -36,13 +36,13 @@ const LogoText = () => (
   <Typography 
     variant="h6" 
     sx={{ 
-      fontWeight: 700,
-      background: 'linear-gradient(45deg, #ffffff 30%, #e3f2fd 90%)',
+      fontWeight: 800,
+      background: 'linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%)',
       backgroundClip: 'text',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
-      letterSpacing: '1px',
-      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+      letterSpacing: '-0.5px',
+      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
     }}
   >
     Rizsign
@@ -65,7 +65,7 @@ export default function NavSidebar({ window, currentPath, onLogout, open, onTogg
     <Box 
       sx={{ 
         height: '100%',
-        background: 'linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)',
+        background: 'linear-gradient(165deg, #ffffff 0%, #f8f9fa 100%)',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -74,7 +74,7 @@ export default function NavSidebar({ window, currentPath, onLogout, open, onTogg
           right: 0,
           bottom: 0,
           width: '1px',
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.05), rgba(0,0,0,0))',
+          background: 'linear-gradient(to bottom, rgba(25, 118, 210, 0.08), transparent)',
         }
       }}
     >
@@ -83,8 +83,9 @@ export default function NavSidebar({ window, currentPath, onLogout, open, onTogg
           justifyContent: 'space-between',
           py: 3,
           px: 2,
-          background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 4px 30px rgba(0,0,0,0.1)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
@@ -96,6 +97,7 @@ export default function NavSidebar({ window, currentPath, onLogout, open, onTogg
             right: 0,
             bottom: 0,
             background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
+            animation: 'pulse 4s ease-in-out infinite',
           }
         }}
       >
@@ -186,19 +188,36 @@ export default function NavSidebar({ window, currentPath, onLogout, open, onTogg
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 transform: 'translateX(0)',
                 '&.Mui-selected': {
-                  bgcolor: 'primary.main',
+                  background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
                   color: 'white',
-                  boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+                  boxShadow: '0 4px 20px rgba(25, 118, 210, 0.3)',
                   '&:hover': {
-                    bgcolor: 'primary.dark',
+                    background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
                   },
                   '& .MuiListItemIcon-root': {
                     color: 'white',
                   }
                 },
                 '&:hover': {
-                  bgcolor: currentPath === item.path ? 'primary.dark' : 'rgba(25, 118, 210, 0.08)',
+                  bgcolor: currentPath === item.path ? 'transparent' : 'rgba(25, 118, 210, 0.04)',
                   transform: 'translateX(8px)',
+                  '&::before': {
+                    opacity: 1,
+                    transform: 'scaleX(1)',
+                  }
+                },
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  left: 0,
+                  width: '4px',
+                  height: '60%',
+                  background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                  borderRadius: '0 4px 4px 0',
+                  opacity: 0,
+                  transform: 'scaleX(0)',
+                  transition: 'all 0.3s ease',
+                  transformOrigin: 'left'
                 }
               }}
             >
@@ -336,6 +355,13 @@ export default function NavSidebar({ window, currentPath, onLogout, open, onTogg
           {drawer}
         </Drawer>
       </Box>
+      <style jsx global>{`
+        @keyframes pulse {
+          0% { opacity: 0.5; }
+          50% { opacity: 0.8; }
+          100% { opacity: 0.5; }
+        }
+      `}</style>
     </Box>
   );
 }
