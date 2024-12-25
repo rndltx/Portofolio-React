@@ -1,12 +1,46 @@
 'use client'
 
-import React from 'react';
-import { Typography, Grid, Box, Card, CardContent, CardHeader, useTheme } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Typography, Grid, Box, Card, CardContent, CardHeader, CircularProgress, useTheme } from '@mui/material';
 import { User, Clock, Briefcase, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const DashboardHome = () => {
+  const router = useRouter();
   const theme = useTheme();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check auth status
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/check', {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          router.push('/login');
+          return;
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        router.push('/login');
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const cards = [
     { 
